@@ -1,0 +1,10 @@
+pynmea2>=1.19
+pyserial>=3.5
+filterpy>=1.4
+scikit-learn>=1.4
+xgboost>=2.0
+pandas>=2.0
+numpy>=1.26
+
+# Pi uniquement (ignoré en dev Mac si non dispo)
+# smbus2>=0.4   # I2C BNO055 — installer manuellement sur Pi

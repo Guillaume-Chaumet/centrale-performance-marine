@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Data & modèles (trop lourds pour git)
+data/*.csv
+data/*.log
+models/*.pkl
+models/*.joblib
+
+# Env
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
