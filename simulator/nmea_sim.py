@@ -69,6 +69,11 @@ class NMEASimulator:
         aws_noise = self._add_noise(aws, 0.3)
         sentences.append(sentence(f"WIMWV,{awa_with_motion:.1f},R,{aws_noise:.1f},N,A"))
 
+        # MWV — vent vrai
+        tws_noise = self._add_noise(self.tws, 0.2)
+        twa_noise = self._add_noise(self.twa, 1.0)
+        sentences.append(sentence(f"WIMWV,{twa_noise:.1f},T,{tws_noise:.1f},N,A"))
+
         # AIS — cible fictive
         sentences.append(sentence("AIVDM,1,1,,A,15M67N0000G?Jp6E`FepT@000000,0"))
 

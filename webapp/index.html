@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Centrale Marine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Archivo', sans-serif; background: #c7cdd4; }
+button { font-family: 'Archivo', sans-serif; }
+
+@keyframes recblink  { 0%,100%{opacity:1} 50%{opacity:.25} }
+@keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes alertglow { 0%,100%{box-shadow:inset 4px 0 0 #e0322c} 50%{box-shadow:inset 4px 0 0 #ff7a6f} }
+
+#appbar {
+  width:100%; background:#0e1a26;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 24px; box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+#stage {
+  min-height: calc(100vh - 57px);
+  display:flex; justify-content:center; align-items:flex-start;
+  padding:34px 20px 60px;
+}
+
+/* tablet visible by default, mobile hidden */
+#tablet { display:block; }
+#mobile { display:none; }
+
+@media (max-width: 639px) {
+  body { background: var(--topbar, #16293d); }
+  #stage { padding:10px 0 0; background:transparent; min-height:0; }
+  #appbar { display:none; }
+  #tablet { display:none; }
+  #mobile { display:block; }
+}
+</style>
+</head>
+<body>
+
+<div id="appbar">
+  <div style="display:flex;flex-direction:column">
+    <span style="font:600 15px 'Archivo',sans-serif;color:#eef3f8;letter-spacing:-0.01em">Centrale de Performance Marine</span>
+    <span style="font:400 11px 'IBM Plex Mono',monospace;color:#6e8298">Signal K · Kalman AWA · polaires XGBoost · pilote TP22</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="ab-dot" style="width:9px;height:9px;border-radius:50%;background:#ef4444;display:inline-block"></span>
+    <span id="ab-label" style="font:500 12px 'IBM Plex Mono',monospace;color:#9db1c7">Connexion…</span>
+  </div>
+</div>
+
+<div id="stage">
+
+<!-- ═══════════════════ TABLET ═══════════════════ -->
+<div id="tablet" style="width:1040px;border-radius:6px;box-shadow:0 14px 40px rgba(0,0,0,.22);overflow:hidden;border:1px solid var(--line);background:var(--bg)">
+
+  <!-- topbar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--topbar)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="t-dot" style="width:9px;height:9px;border-radius:50%;background:#ef4444"></div>
+      <span style="font:600 13px 'IBM Plex Mono',monospace;color:var(--topbarink);letter-spacing:.08em">SIGNAL K · BORD</span>
+      <span id="t-sail-top" style="font:500 12px 'IBM Plex Mono',monospace;color:var(--accent);margin-left:8px">GV + GÉNOIS</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;font:500 12px 'IBM Plex Mono',monospace;color:var(--topbarink)">
+      <span style="display:flex;align-items:center;gap:6px">
+        <span id="t-recdot" style="width:7px;height:7px;border-radius:50%;background:#5d7186;display:inline-block"></span>
+        <span id="t-rectext">CSV ARRÊTÉ</span>
+      </span>
+      <button onclick="toggleTheme()" id="t-thbtn" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--accent);border-radius:6px;padding:4px 11px;cursor:pointer;font:600 12px 'Archivo',sans-serif">☾ Nuit</button>
+      <span id="t-clock">--:--</span>
+    </div>
+  </div>
+
+  <!-- alerts -->
+  <div id="t-alerts"></div>
+
+  <!-- tabs -->
+  <div style="display:flex;background:var(--tile2);border-bottom:1px solid var(--line)">
+    <button id="t-tab-i" onclick="setView('instruments')" style="flex:none;padding:13px 24px;border:none;background:transparent;cursor:pointer;font:600 13px 'Archivo',sans-serif;color:var(--ink);border-bottom:3px solid var(--accent)">Instruments</button>
+    <button id="t-tab-a" onclick="setView('ais')" style="flex:none;padding:13px 24px;border:none;background:transparent;cursor:pointer;font:600 13px 'Archivo',sans-serif;color:var(--muted);border-bottom:3px solid transparent">AIS · Trafic</button>
+  </div>
+
+  <!-- ── INSTRUMENTS ── -->
+  <div id="t-instr">
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:1px;background:var(--line)">
+
+      <!-- AWA hero -->
+      <div style="background:var(--bg);padding:22px 24px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font:600 13px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.14em">AWA · ANGLE VENT APPARENT</span>
+          <span id="t-awa-side" style="font:600 11px 'IBM Plex Mono',monospace;color:var(--goodtext)">● —</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:24px;margin-top:6px">
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <span id="t-awa" style="font:700 132px 'Barlow Condensed',sans-serif;color:var(--hero);line-height:.82;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">—</span>
+            <span style="font:600 40px 'Barlow Condensed',sans-serif;color:var(--accent)">°</span>
+          </div>
+          <svg viewBox="0 0 200 200" style="width:172px;height:172px;flex:none">
+            <path d="M100 10 A90 90 0 0 1 100 190" fill="none" style="stroke:var(--arcg)" stroke-width="13"></path>
+            <path d="M100 10 A90 90 0 0 0 100 190" fill="none" style="stroke:var(--arcr)" stroke-width="13"></path>
+            <circle cx="100" cy="100" r="78" fill="none" style="stroke:var(--tick)" stroke-width="9" stroke-dasharray="1.4 14.6"></circle>
+            <g id="t-needle" transform="rotate(0 100 100)"><polygon points="100,26 94,108 106,108" style="fill:var(--accent)"></polygon></g>
+            <circle cx="100" cy="100" r="7" style="fill:var(--hub)"></circle>
+          </svg>
+        </div>
+        <div style="margin-top:10px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">FILTRE KALMAN 1D · BNO055 ROLL-CORR · 10 Hz</div>
+      </div>
+
+      <!-- AWS + mini grid -->
+      <div style="background:var(--bg);padding:22px 24px 18px;display:flex;flex-direction:column;gap:14px">
+        <div>
+          <span style="font:600 13px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.14em">AWS · VENT APPARENT</span>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:2px">
+            <span id="t-aws" style="font:700 92px 'Barlow Condensed',sans-serif;color:var(--ink);line-height:.82;font-variant-numeric:tabular-nums">—</span>
+            <span style="font:600 26px 'Barlow Condensed',sans-serif;color:var(--accent)">kn</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden">
+          <div style="background:var(--panel);padding:12px 14px">
+            <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">TWA</div>
+            <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-twa">—</span><span style="font-size:20px;color:var(--accent)">°</span></div>
+          </div>
+          <div style="background:var(--panel);padding:12px 14px">
+            <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">TWS</div>
+            <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-tws">—</span><span style="font-size:20px;color:var(--accent)">kn</span></div>
+          </div>
+          <div style="background:var(--panel);padding:12px 14px">
+            <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">STW</div>
+            <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-stw">—</span><span style="font-size:20px;color:var(--accent)">kn</span></div>
+          </div>
+          <div style="background:var(--panel);padding:12px 14px">
+            <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">GÎTE · IMU</div>
+            <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-heel">—</span><span style="font-size:20px;color:var(--accent)">°</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VMG + Rendement + Polar -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:1px;background:var(--line);border-top:1px solid var(--line)">
+      <div style="background:var(--bg);padding:16px 22px">
+        <div style="font:600 12px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.12em">VMG</div>
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <span id="t-vmg" style="font:700 58px 'Barlow Condensed',sans-serif;color:var(--goodtext);line-height:.9;font-variant-numeric:tabular-nums">—</span>
+          <span style="font:600 18px 'Barlow Condensed',sans-serif;color:var(--muted)">kn</span>
+        </div>
+      </div>
+      <div style="background:var(--bg);padding:16px 22px">
+        <div style="font:600 12px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.12em">RENDEMENT POLAIRE</div>
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <span id="t-rdt" style="font:700 58px 'Barlow Condensed',sans-serif;color:var(--accent);line-height:.9;font-variant-numeric:tabular-nums">—</span>
+          <span style="font:600 22px 'Barlow Condensed',sans-serif;color:var(--muted)">%</span>
+        </div>
+        <div style="height:5px;background:var(--bartrack);border-radius:3px;margin-top:4px;overflow:hidden">
+          <div id="t-rdtbar" style="width:0%;height:100%;background:var(--accent);transition:width .5s"></div>
+        </div>
+      </div>
+      <div style="background:var(--bg);padding:14px 18px;display:flex;align-items:center;gap:14px">
+        <svg viewBox="0 0 150 150" style="width:118px;height:118px;flex:none">
+          <circle cx="75" cy="75" r="62" fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
+          <circle cx="75" cy="75" r="41" fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
+          <circle cx="75" cy="75" r="20" fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
+          <line x1="75" y1="13" x2="75" y2="137" style="stroke:var(--polarline)" stroke-width="1"></line>
+          <line x1="13" y1="75" x2="137" y2="75" style="stroke:var(--polarline)" stroke-width="1"></line>
+          <path d="M75 16 C112 22 130 60 116 100 C108 124 92 134 75 134 C58 134 42 124 34 100 C20 60 38 22 75 16 Z" fill="rgba(31,138,91,.13)" stroke="#1f8a5b" stroke-width="2"></path>
+          <circle id="t-polardot" cx="111" cy="55" r="5" style="fill:var(--accent)"></circle>
+        </svg>
+        <div>
+          <div style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">POLAIRE LIVE</div>
+          <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);margin-top:4px;line-height:1.5">XGBoost · <span id="t-polarsail">GV + GÉNOIS</span><br>cible VMG ●</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls bar -->
+    <div style="display:flex;gap:1px;background:var(--line);border-top:1px solid var(--line);position:relative">
+      <!-- sail dropdown -->
+      <div style="flex:1;position:relative">
+        <div id="t-sailmenu" style="display:none;position:absolute;left:0;right:0;bottom:100%;background:var(--panel);border:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.2);overflow:hidden;z-index:30">
+          <div style="padding:9px 16px;font:600 10px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.12em;background:var(--tile2);border-bottom:1px solid var(--line)">CONFIGURATION VOILURE</div>
+          <div id="t-saillist"></div>
+        </div>
+        <button onclick="toggleMenu()" style="width:100%;background:var(--panel);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border:none;cursor:pointer">
+          <span style="font:600 12px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">VOILURE&nbsp;&nbsp;▾</span>
+          <span id="t-sailbtn" style="font:600 16px 'Archivo',sans-serif;color:var(--ink)">GV + GÉNOIS</span>
+        </button>
+      </div>
+      <!-- pilot tile -->
+      <button id="t-pilotbtn" onclick="togglePilot()" style="flex:1.2;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;border:1px solid var(--line);background:var(--panel)">
+        <span id="t-pilotlabel" style="display:flex;align-items:center;gap:8px;font:600 12px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--muted)">
+          <span id="t-pilotdot" style="width:8px;height:8px;border-radius:50%;background:#9aa7b2;display:inline-block"></span>
+          PILOTE · DÉGAGÉ
+        </span>
+        <span id="t-pilotsub" style="font:600 14px 'Archivo',sans-serif;color:var(--muted)">Appuyer pour engager</span>
+      </button>
+      <!-- rec tile -->
+      <button id="t-recbtn" onclick="toggleRec()" style="flex:1;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;border:none;background:var(--panel)">
+        <span id="t-reclabel" style="display:flex;align-items:center;gap:8px;font:600 12px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--muted)">
+          <span id="t-recdotctrl" style="width:8px;height:8px;border-radius:50%;background:#9aa7b2;display:inline-block"></span>
+          ENREG. CSV
+        </span>
+        <span id="t-recval" style="font:600 14px 'Archivo',sans-serif;color:var(--muted)">Arrêté</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── AIS ── -->
+  <div id="t-ais" style="display:none;grid-template-columns:1fr 1.1fr;background:var(--bg)">
+    <div style="padding:22px;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--line)">
+      <svg viewBox="0 0 360 360" style="width:340px;height:340px">
+        <circle cx="180" cy="180" r="168" style="fill:var(--panel);stroke:var(--line)" stroke-width="1"></circle>
+        <circle cx="180" cy="180" r="126" fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
+        <circle cx="180" cy="180" r="84"  fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
+        <circle cx="180" cy="180" r="42"  fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
+        <line x1="180" y1="12" x2="180" y2="348" style="stroke:var(--polarline)" stroke-width="1"></line>
+        <line x1="12" y1="180" x2="348" y2="180" style="stroke:var(--polarline)" stroke-width="1"></line>
+        <text x="184" y="24" font-family="IBM Plex Mono" font-size="10" style="fill:var(--muted)">N</text>
+        <polygon points="180,166 173,194 187,194" style="fill:var(--accent)"></polygon>
+        <text x="130" y="198" font-family="IBM Plex Mono" font-size="9" style="fill:var(--muted)">2 / 4 / 6 NM</text>
+        <g id="t-radarships"></g>
+      </svg>
+    </div>
+    <div style="padding:10px 0">
+      <div style="display:grid;grid-template-columns:1.5fr .7fr .7fr .8fr .7fr;gap:8px;padding:8px 22px;font:600 10px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.08em;border-bottom:1px solid var(--line)">
+        <span>NAVIRE</span><span>REL.</span><span>DIST</span><span>CPA</span><span>SOG</span>
+      </div>
+      <div id="t-aislist"></div>
+    </div>
+  </div>
+
+</div><!-- /tablet -->
+
+
+<!-- ═══════════════════ MOBILE ═══════════════════ -->
+<div id="mobile" style="width:100%;background:var(--bg);border-radius:34px 34px 0 0;overflow:hidden">
+
+  <!-- status bar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px 5px;background:var(--bg)">
+    <span id="m-clock" style="font:500 11px 'IBM Plex Mono',monospace;color:var(--ink)">--:--</span>
+    <span id="m-sk" style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted)">Signal K</span>
+    <button onclick="toggleTheme()" id="m-thbtn" style="background:transparent;border:1px solid var(--line);color:var(--accent);border-radius:6px;padding:3px 9px;cursor:pointer;font:600 11px 'Archivo'">☾ Nuit</button>
+  </div>
+
+  <!-- alerts -->
+  <div id="m-alerts"></div>
+
+  <!-- INSTRUMENTS -->
+  <div id="m-instr">
+    <div style="position:relative;margin:6px 14px 0;z-index:30">
+      <button onclick="toggleMenu()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 4px 8px;border:none;border-bottom:2px solid var(--ink);background:transparent;cursor:pointer">
+        <span id="m-sailname" style="font:600 13px 'Archivo';color:var(--ink)">GV + GÉNOIS</span>
+        <span style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted)">6 configs ▾</span>
+      </button>
+      <div id="m-sailmenu" style="display:none;position:absolute;left:0;right:0;top:100%;background:var(--panel);border:1px solid var(--line);border-radius:0 0 10px 10px;box-shadow:0 12px 30px rgba(0,0,0,.22);overflow:hidden;z-index:40">
+        <div id="m-saillist"></div>
+      </div>
+    </div>
+    <div style="padding:12px 18px 4px">
+      <div style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">AWA · KALMAN</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <span id="m-awa" style="font:700 108px 'Barlow Condensed';color:var(--hero);line-height:.8;font-variant-numeric:tabular-nums">—</span>
+        <span style="font:600 34px 'Barlow Condensed';color:var(--accent)">°</span>
+        <span id="m-awaside" style="font:600 13px 'IBM Plex Mono',monospace;color:var(--goodtext);margin-left:auto">—</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 18px 4px">
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 13px">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">AWS</div>
+        <div style="font:700 38px 'Barlow Condensed';color:var(--ink);font-variant-numeric:tabular-nums"><span id="m-aws">—</span><span style="font-size:13px;color:var(--accent)"> kn</span></div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 13px">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">STW</div>
+        <div style="font:700 38px 'Barlow Condensed';color:var(--ink);font-variant-numeric:tabular-nums"><span id="m-stw">—</span><span style="font-size:13px;color:var(--accent)"> kn</span></div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 13px">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">TWA / TWS</div>
+        <div style="font:700 38px 'Barlow Condensed';color:var(--ink);font-variant-numeric:tabular-nums"><span id="m-twa">—</span>°<span id="m-twssm" style="font-size:15px;color:var(--accent)"> —</span></div>
+      </div>
+      <div style="background:var(--topbar);border-radius:8px;padding:11px 13px">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--topbarink)">VMG · RDT</div>
+        <div style="font:700 38px 'Barlow Condensed';color:#9fe0bd;font-variant-numeric:tabular-nums"><span id="m-vmg">—</span><span id="m-rdtsm" style="font-size:15px;color:var(--accent)"> —</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;padding:12px 16px 14px">
+      <div onclick="toggleMenu()" style="flex:1;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px;text-align:center;cursor:pointer">
+        <div style="font:600 10px 'IBM Plex Mono',monospace;color:var(--muted)">VOILURE</div>
+        <div style="font:600 12px 'Archivo';color:var(--ink);margin-top:2px">Changer</div>
+      </div>
+      <button id="m-pilotbtn" onclick="togglePilot()" style="flex:1;border-radius:9px;padding:11px;text-align:center;cursor:pointer;background:var(--panel);border:1px solid var(--line)">
+        <div id="m-pilotlbl" style="font:600 10px 'IBM Plex Mono',monospace;color:var(--muted)">PILOTE</div>
+        <div id="m-pilotst" style="font:600 12px 'Archivo';color:var(--ink);margin-top:2px">Dégagé</div>
+      </button>
+      <button id="m-recbtn" onclick="toggleRec()" style="flex:1;border-radius:9px;padding:11px;text-align:center;cursor:pointer;background:var(--panel);border:1px solid var(--line)">
+        <div id="m-reclbl" style="display:flex;align-items:center;justify-content:center;gap:5px;font:600 10px 'IBM Plex Mono',monospace;color:var(--muted)">
+          <span id="m-recdot" style="width:6px;height:6px;border-radius:50%;background:#9aa7b2;display:inline-block"></span>REC
+        </div>
+        <div id="m-recval" style="font:600 12px 'Archivo';color:var(--ink);margin-top:2px">Arrêté</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- AIS -->
+  <div id="m-ais" style="display:none;padding:10px 0 6px">
+    <div style="display:flex;justify-content:space-between;padding:6px 18px">
+      <span id="m-aishdr" style="font:600 13px 'Archivo';color:var(--ink)">AIS</span>
+      <span style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted)">portée 6 NM</span>
+    </div>
+    <div id="m-aislist"></div>
+  </div>
+
+  <!-- bottom nav -->
+  <div style="display:flex;background:var(--topbar)">
+    <button id="m-navi" onclick="setView('instruments')" style="flex:1;padding:13px 0;border:none;cursor:pointer;font:600 13px 'Archivo',sans-serif;background:rgba(255,255,255,.06);color:var(--accent);border-top:2px solid var(--accent)">Instruments</button>
+    <button id="m-nava" onclick="setView('ais')" style="flex:1;padding:13px 0;border:none;cursor:pointer;font:600 13px 'Archivo',sans-serif;background:transparent;color:#6e8298;border-top:2px solid transparent">AIS</button>
+  </div>
+</div><!-- /mobile -->
+
+</div><!-- /stage -->
+
+<script>
+const WS_URL = `ws://${location.hostname}:8081`;
+let ws = null, lastData = {};
+const S = { theme:'day', view:'instruments', sail:0, pilot:false, rec:false, menuOpen:false, windDismissed:false, depDismissed:false };
+
+const THEMES = {
+  day: { '--bg':'#f4f1ea','--panel':'#ffffff','--line':'#e2dccd','--tile2':'#ece6d8',
+    '--ink':'#16293d','--hero':'#16293d','--muted':'#8a7e63','--label':'#7a6f55',
+    '--accent':'#b9892f','--goodtext':'#1f8a5b','--bad':'#e0322c',
+    '--topbar':'#16293d','--topbarink':'#9db1c7','--polarline':'#d8cfb8',
+    '--pilotbg':'#e6f0e9','--bartrack':'#e6dfcf','--arcg':'#cfe0d4','--arcr':'#e8d2cd',
+    '--tick':'#cabf9e','--hub':'#16293d' },
+  night: { '--bg':'#070e16','--panel':'#0f1d2e','--line':'#14263a','--tile2':'#0a1521',
+    '--ink':'#eef3f8','--hero':'#e8b54a','--muted':'#7d93a8','--label':'#7d93a8',
+    '--accent':'#e8b54a','--goodtext':'#5fc28f','--bad':'#e0322c',
+    '--topbar':'#0a1521','--topbarink':'#6e8298','--polarline':'#16273a',
+    '--pilotbg':'#0e2419','--bartrack':'#14263a','--arcg':'#15412f','--arcr':'#4a1f1c',
+    '--tick':'#2a3c52','--hub':'#e8b54a' },
+};
+
+const SAILS = [
+  { name:'GV + GÉNOIS', sub:'près · médium', key:'gv_genois' },
+  { name:'GV + SPI',    sub:'portant',        key:'gv_spi' },
+  { name:'1 RIS + GÉN.',sub:'15–22 kn',       key:'1ris_genois' },
+  { name:'1 RIS + SPI', sub:'portant frais',   key:'1ris_spi' },
+  { name:'2 RIS + GÉN.',sub:'22+ kn',          key:'2ris_genois' },
+  { name:'2 RIS + SPI', sub:'portant fort',    key:'2ris_spi' },
+];
+const SAIL_BY_KEY = Object.fromEntries(SAILS.map((s,i) => [s.key, i]));
+
+// ── Theme ──────────────────────────────────────────────────────────
+function applyTheme() {
+  const v = THEMES[S.theme];
+  const stage = document.getElementById('stage');
+  stage.style.cssText = Object.entries(v).map(([k,val]) => `${k}:${val}`).join(';');
+  // mobile shell border = topbar color
+  document.getElementById('mobile').style.borderColor = v['--topbar'];
+  const lbl = S.theme === 'day' ? '☾ Nuit' : '☀ Jour';
+  g('t-thbtn').textContent = lbl;
+  g('m-thbtn').textContent = lbl;
+}
+function toggleTheme() { S.theme = S.theme === 'day' ? 'night' : 'day'; applyTheme(); }
+
+// ── View ───────────────────────────────────────────────────────────
+function setView(v) {
+  S.view = v; S.menuOpen = false; syncMenus();
+  const isI = v === 'instruments';
+  // tablet
+  g('t-instr').style.display = isI ? 'block' : 'none';
+  g('t-ais').style.display   = isI ? 'none'  : 'grid';
+  styleTab('t-tab-i', isI); styleTab('t-tab-a', !isI);
+  // mobile
+  g('m-instr').style.display = isI ? 'block' : 'none';
+  g('m-ais').style.display   = isI ? 'none'  : 'block';
+  styleNav('m-navi', isI); styleNav('m-nava', !isI);
+}
+function styleTab(id, active) {
+  g(id).style.cssText = `flex:none;padding:13px 24px;border:none;background:transparent;cursor:pointer;font:600 13px 'Archivo',sans-serif;color:${active ? 'var(--ink)' : 'var(--muted)'};border-bottom:3px solid ${active ? 'var(--accent)' : 'transparent'}`;
+}
+function styleNav(id, active) {
+  g(id).style.cssText = `flex:1;padding:13px 0;border:none;cursor:pointer;font:600 13px 'Archivo',sans-serif;background:${active ? 'rgba(255,255,255,.06)' : 'transparent'};color:${active ? 'var(--accent)' : '#6e8298'};border-top:2px solid ${active ? 'var(--accent)' : 'transparent'}`;
+}
+
+// ── Sail menus ─────────────────────────────────────────────────────
+function buildSailMenus() {
+  const html = SAILS.map((d,i) => {
+    const a = i === S.sail;
+    return `<div onclick="selectSail(${i})" style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;border-bottom:1px solid var(--line);background:${a ? 'var(--tile2)' : 'var(--panel)'}">
+      <div><div style="font:600 13px 'Archivo',sans-serif;color:${a ? 'var(--accent)' : 'var(--ink)'}">${d.name}</div>
+      <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted);margin-top:2px">${d.sub}</div></div>
+      <span style="font-size:11px;color:${a ? 'var(--accent)' : 'transparent'}">●</span></div>`;
+  }).join('');
+  g('t-saillist').innerHTML = html;
+  g('m-saillist').innerHTML = html.replace(/onclick="selectSail\((\d+)\)"/g, 'onclick="selectSail($1)"');
+  const n = SAILS[S.sail].name;
+  ['t-sail-top','t-sailbtn','m-sailname','t-polarsail'].forEach(id => { const el = g(id); if(el) el.textContent = n; });
+}
+function selectSail(i) { S.sail = i; S.menuOpen = false; buildSailMenus(); syncMenus(); send({type:'sail_config',value:SAILS[i].key}); }
+function toggleMenu() { S.menuOpen = !S.menuOpen; syncMenus(); }
+function syncMenus() {
+  g('t-sailmenu').style.display = S.menuOpen ? 'block' : 'none';
+  g('m-sailmenu').style.display = S.menuOpen ? 'block' : 'none';
+}
+
+// ── Pilot ──────────────────────────────────────────────────────────
+function togglePilot() { send({type:'autopilot', value: S.pilot ? 'disengage' : 'engage'}); }
+function updatePilot(on) {
+  S.pilot = on;
+  const btn = g('t-pilotbtn');
+  btn.style.borderColor = on ? '#1f8a5b' : 'var(--line)';
+  btn.style.background  = on ? 'var(--pilotbg)' : 'var(--panel)';
+  g('t-pilotlabel').style.color = on ? 'var(--goodtext)' : 'var(--muted)';
+  g('t-pilotdot').style.background = on ? '#1f8a5b' : '#9aa7b2';
+  g('t-pilotdot').style.animation  = on ? 'livepulse 2s infinite' : 'none';
+  g('t-pilotlabel').childNodes[2].textContent = on ? 'PILOTE · ENGAGÉ' : 'PILOTE · DÉGAGÉ';
+  g('t-pilotsub').textContent = on ? "Conservateur d'allure · VMG" : 'Appuyer pour engager';
+  g('t-pilotsub').style.color = on ? 'var(--ink)' : 'var(--muted)';
+  // mobile
+  g('m-pilotbtn').style.background  = on ? 'var(--pilotbg)' : 'var(--panel)';
+  g('m-pilotbtn').style.borderColor = on ? '#1f8a5b' : 'var(--line)';
+  g('m-pilotlbl').style.color = on ? 'var(--goodtext)' : 'var(--muted)';
+  g('m-pilotst').textContent  = on ? 'Engagé' : 'Dégagé';
+}
+
+// ── Recording ──────────────────────────────────────────────────────
+function toggleRec() { send({type:'recording', value: S.rec ? 'stop' : 'start'}); }
+function updateRec(on, dur) {
+  S.rec = on;
+  const d = fmtDur(dur);
+  // topbar dot
+  g('t-recdot').style.background = on ? '#e0322c' : '#5d7186';
+  g('t-recdot').style.animation  = on ? 'recblink 1.4s infinite' : 'none';
+  g('t-rectext').textContent = on ? `REC ${d}` : 'CSV ARRÊTÉ';
+  // tile
+  g('t-reclabel').style.color  = on ? '#e0322c' : 'var(--muted)';
+  g('t-recdotctrl').style.background = on ? '#e0322c' : '#9aa7b2';
+  g('t-recdotctrl').style.animation  = on ? 'recblink 1.4s infinite' : 'none';
+  g('t-recval').textContent = on ? 'Actif' : 'Arrêté';
+  g('t-recval').style.color = on ? 'var(--ink)' : 'var(--muted)';
+  // mobile
+  g('m-recdot').style.background = on ? '#e0322c' : '#9aa7b2';
+  g('m-recdot').style.animation  = on ? 'recblink 1.4s infinite' : 'none';
+  g('m-reclbl').style.color = on ? '#e0322c' : 'var(--muted)';
+  g('m-recval').textContent = on ? d : 'Arrêté';
+}
+function fmtDur(sec) {
+  if (!sec) return '00:00:00';
+  const s = Math.floor(sec), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+  return [h,m,ss].map(x => String(x).padStart(2,'0')).join(':');
+}
+
+// ── Alerts ─────────────────────────────────────────────────────────
+function renderAlerts(d) {
+  const windOn = !S.windDismissed && d.wind_alert;
+  const depOn  = !S.depDismissed  && d.dep_alert;
+  if (!d.wind_alert) S.windDismissed = false;
+  if (!d.dep_alert)  S.depDismissed  = false;
+  const tws = d.tws != null ? d.tws.toFixed(1) + ' kn' : '--';
+  const trend = d.pressure_trend != null ? d.pressure_trend.toFixed(1) : '?';
+
+  const tW = windOn ? `<div style="display:flex;align-items:center;gap:13px;background:var(--panel);padding:11px 18px;box-shadow:inset 4px 0 0 #e0322c;animation:alertglow 2.2s infinite">
+    <span style="flex:none;width:28px;height:28px;border-radius:7px;background:#e0322c;display:flex;align-items:center;justify-content:center;font:700 16px sans-serif;color:#fff">!</span>
+    <div style="flex:1"><b style="font:700 13px 'Archivo';color:var(--ink)">VENT FORT</b><span style="font:500 12px 'IBM Plex Mono',monospace;color:var(--muted);margin-left:10px">Rafales ${tws} — envisager 1 ris</span></div>
+    <button onclick="S.windDismissed=true;renderAlerts(lastData)" style="background:transparent;border:none;cursor:pointer;font:400 18px sans-serif;color:var(--muted);line-height:1">×</button></div>` : '';
+  const tD = depOn ? `<div style="display:flex;align-items:center;gap:13px;background:var(--panel);padding:11px 18px;box-shadow:inset 4px 0 0 #2a6fdb">
+    <span style="flex:none;width:28px;height:28px;border-radius:7px;background:#2a6fdb;display:flex;align-items:center;justify-content:center;font:700 16px sans-serif;color:#fff">L</span>
+    <div style="flex:1"><b style="font:700 13px 'Archivo';color:var(--ink)">DÉPRESSION EN APPROCHE</b><span style="font:500 12px 'IBM Plex Mono',monospace;color:var(--muted);margin-left:10px">Baromètre ${trend} hPa / 3 h</span></div>
+    <button onclick="S.depDismissed=true;renderAlerts(lastData)" style="background:transparent;border:none;cursor:pointer;font:400 18px sans-serif;color:var(--muted);line-height:1">×</button></div>` : '';
+  g('t-alerts').innerHTML = (tW || tD)
+    ? `<div style="display:flex;flex-direction:column;gap:1px;background:var(--line)">${tW}${tD}</div>` : '';
+
+  const mW = windOn ? `<div style="display:flex;align-items:center;gap:10px;margin:6px 14px 0;padding:9px 12px;background:var(--panel);border-radius:9px;box-shadow:inset 4px 0 0 #e0322c">
+    <span style="flex:none;width:24px;height:24px;border-radius:6px;background:#e0322c;display:flex;align-items:center;justify-content:center;font:700 14px sans-serif;color:#fff">!</span>
+    <div style="flex:1"><div style="font:700 12px 'Archivo';color:var(--ink)">VENT FORT · ${tws}</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">Envisager 1 ris</div></div>
+    <button onclick="S.windDismissed=true;renderAlerts(lastData)" style="background:transparent;border:none;cursor:pointer;font:400 16px sans-serif;color:var(--muted)">×</button></div>` : '';
+  const mD = depOn ? `<div style="display:flex;align-items:center;gap:10px;margin:6px 14px 0;padding:9px 12px;background:var(--panel);border-radius:9px;box-shadow:inset 4px 0 0 #2a6fdb">
+    <span style="flex:none;width:24px;height:24px;border-radius:6px;background:#2a6fdb;display:flex;align-items:center;justify-content:center;font:700 14px sans-serif;color:#fff">L</span>
+    <div style="flex:1"><div style="font:700 12px 'Archivo';color:var(--ink)">DÉPRESSION EN APPROCHE</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">Baro ${trend} hPa/3h</div></div>
+    <button onclick="S.depDismissed=true;renderAlerts(lastData)" style="background:transparent;border:none;cursor:pointer;font:400 16px sans-serif;color:var(--muted)">×</button></div>` : '';
+  g('m-alerts').innerHTML = mW + mD;
+}
+
+// ── AIS ────────────────────────────────────────────────────────────
+function renderAIS(vessels) {
+  if (!vessels || !vessels.length) {
+    const empty = `<div style="padding:20px 22px;font:500 12px 'IBM Plex Mono',monospace;color:var(--muted)">Aucune cible AIS détectée</div>`;
+    g('t-aislist').innerHTML = empty;
+    g('m-aislist').innerHTML = `<div style="padding:20px 18px;font:500 12px 'IBM Plex Mono',monospace;color:var(--muted)">Aucune cible AIS détectée</div>`;
+    g('t-radarships').innerHTML = '';
+    g('m-aishdr').textContent = 'AIS · 0 cibles';
+    return;
+  }
+  const sorted = [...vessels].sort((a,b) => (a.cpa ?? 999) - (b.cpa ?? 999));
+  g('m-aishdr').textContent = `AIS · ${sorted.length} cibles`;
+
+  g('t-aislist').innerHTML = sorted.map(v => {
+    const cc = cpaColor(v.cpa);
+    return `<div style="display:grid;grid-template-columns:1.5fr .7fr .7fr .8fr .7fr;gap:8px;padding:13px 22px;align-items:center;border-bottom:1px solid var(--line)">
+      <div><div style="font:600 14px 'Archivo';color:var(--ink)">${v.name || v.mmsi}</div>
+      <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.type || 'Navire'}${v.length ? ' · ' + v.length + 'm' : ''}</div></div>
+      <span style="font:600 17px 'Barlow Condensed';color:var(--muted)">${v.bearing != null ? v.bearing + '°' : '—'}</span>
+      <span style="font:600 17px 'Barlow Condensed';color:var(--ink)">${v.distance != null ? v.distance.toFixed(1) : '—'}</span>
+      <span style="font:700 17px 'Barlow Condensed';color:${cc}">${v.cpa != null ? v.cpa.toFixed(1) + ' NM' : '—'}</span>
+      <span style="font:600 17px 'Barlow Condensed';color:var(--ink)">${v.sog != null ? v.sog.toFixed(1) : '—'}</span></div>`;
+  }).join('');
+
+  g('m-aislist').innerHTML = sorted.map(v => {
+    const cc = cpaColor(v.cpa);
+    const highlight = v.cpa != null && v.cpa < 0.5 ? ';box-shadow:inset 4px 0 0 #e0322c' : '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-top:1px solid var(--line)${highlight}">
+      <div><div style="font:600 13px 'Archivo';color:var(--ink)">${v.name || v.mmsi}</div>
+      <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.type || 'Navire'} · ${v.bearing != null ? v.bearing + '°' : '—'} · ${v.distance != null ? v.distance.toFixed(1) + ' NM' : '—'}</div></div>
+      <div style="text-align:right"><div style="font:700 18px 'Barlow Condensed';color:${cc}">CPA ${v.cpa != null ? v.cpa.toFixed(1) : '—'}</div>
+      <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.sog != null ? v.sog.toFixed(1) + ' kn' : '—'}</div></div></div>`;
+  }).join('');
+
+  // radar blips
+  g('t-radarships').innerHTML = sorted.map(v => {
+    if (v.bearing == null || v.distance == null) return '';
+    const r = v.bearing * Math.PI / 180;
+    const d = Math.min(v.distance, 6);
+    const x = (180 + d * 21 * Math.sin(r)).toFixed(1);
+    const y = (180 - d * 21 * Math.cos(r)).toFixed(1);
+    const fill = v.cpa != null && v.cpa < 0.5 ? '#e0322c' : '#1f8a5b';
+    const rot = v.cog != null ? v.cog : 0;
+    return `<g transform="translate(${x},${y})"><polygon points="0,-7 -5,7 5,7" fill="${fill}" transform="rotate(${rot})"></polygon></g>`;
+  }).join('');
+}
+function cpaColor(cpa) {
+  if (cpa == null) return 'var(--muted)';
+  return cpa < 0.5 ? '#e0322c' : cpa >= 1.0 ? 'var(--goodtext)' : 'var(--accent)';
+}
+
+// ── Clock ──────────────────────────────────────────────────────────
+function tick() {
+  const t = new Date(), hh = String(t.getHours()).padStart(2,'0'), mm = String(t.getMinutes()).padStart(2,'0');
+  const s = `${hh}:${mm}`;
+  g('t-clock').textContent = s; g('m-clock').textContent = s;
+}
+setInterval(tick, 15000); tick();
+
+// ── Connection ─────────────────────────────────────────────────────
+function setConn(ok) {
+  const c = ok ? '#5fc28f' : '#ef4444';
+  g('ab-dot').style.background = c;
+  g('ab-label').textContent = ok ? 'Connecté · Signal K' : 'Déconnecté — reconnexion…';
+  g('t-dot').style.background = c;
+  g('t-dot').style.boxShadow  = ok ? '0 0 8px #1f8a5b' : 'none';
+  g('m-sk').textContent = ok ? '● Signal K' : '○ Déco.';
+  g('m-sk').style.color = ok ? 'var(--goodtext)' : 'var(--muted)';
+}
+
+// ── Data ───────────────────────────────────────────────────────────
+function applyData(d) {
+  lastData = d;
+  const awa = d.awa_filtered;
+  const awaAbs = awa != null ? Math.abs(awa) : null;
+  set('t-awa', awaAbs != null ? awaAbs.toFixed(0) : '—');
+  set('m-awa', awaAbs != null ? awaAbs.toFixed(0) : '—');
+  const side = awa != null ? (awa >= 0 ? 'STBD' : 'PORT') : null;
+  const sideCol = awa != null && awa >= 0 ? 'var(--goodtext)' : '#e0322c';
+  if (g('t-awa-side')) { g('t-awa-side').textContent = side ? `● ${side}` : '—'; g('t-awa-side').style.color = sideCol; }
+  if (g('m-awaside'))  { g('m-awaside').textContent  = side ? (awa >= 0 ? 'TRIB ●' : '● BÂB') : '—'; g('m-awaside').style.color = sideCol; }
+  if (awa != null) g('t-needle').setAttribute('transform', `rotate(${awa.toFixed(1)} 100 100)`);
+
+  set('t-aws', fmt(d.aws, 1)); set('m-aws', fmt(d.aws, 1));
+  set('t-twa', fmt(d.twa, 0)); set('m-twa', fmt(d.twa, 0));
+  set('t-tws', fmt(d.tws, 1));
+  set('m-twssm', d.tws != null ? ' ' + d.tws.toFixed(1) : ' —');
+  set('t-stw', fmt(d.stw, 1)); set('m-stw', fmt(d.stw, 1));
+  set('t-heel', fmt(d.heel, 1));
+  set('t-vmg', fmt(d.vmg, 1)); set('m-vmg', fmt(d.vmg, 1));
+
+  const rdt = d.rendement != null ? Math.round(d.rendement * 100) : null;
+  set('t-rdt', rdt != null ? String(rdt) : '—');
+  if (g('t-rdtbar')) g('t-rdtbar').style.width = (rdt ?? 0) + '%';
+  set('m-rdtsm', rdt != null ? ` ${rdt}%` : ' —');
+
+  // sync sail from server
+  if (d.sail_config != null) {
+    const idx = SAIL_BY_KEY[d.sail_config];
+    if (idx !== undefined && idx !== S.sail) { S.sail = idx; buildSailMenus(); }
+  }
+
+  updatePilot(!!d.autopilot_active);
+  updateRec(!!d.is_recording, d.rec_duration);
+  renderAlerts(d);
+  renderAIS(d.ais_vessels || []);
+}
+
+// ── WebSocket ──────────────────────────────────────────────────────
+function connect() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen    = () => setConn(true);
+  ws.onclose   = () => { setConn(false); setTimeout(connect, 3000); };
+  ws.onerror   = () => ws.close();
+  ws.onmessage = e => applyData(JSON.parse(e.data));
+}
+function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+// ── Utils ──────────────────────────────────────────────────────────
+function g(id) { return document.getElementById(id); }
+function set(id, val) { const el = g(id); if (el) el.textContent = val; }
+function fmt(v, dec) { return v != null ? parseFloat(v).toFixed(dec) : '—'; }
+
+// ── Boot ───────────────────────────────────────────────────────────
+applyTheme();
+buildSailMenus();
+setView('instruments');
+connect();
+</script>
+</body>
+</html>

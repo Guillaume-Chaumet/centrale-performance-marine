@@ -125,12 +125,16 @@ Serveur   : Signal K Server (Node.js)
               └── port TCP 10110 → Navionics (iPad/Android)
 
 Python    : 3.11+
-  pynmea2     — parsing et génération phrases NMEA
-  filterpy    — filtre de Kalman (fusion IMU 10Hz + vent 1Hz)
-  smbus2      — lecture IMU BNO055 via I2C
-  scikit-learn / xgboost — modèle polaires (Random Forest ou XGBoost)
-  pandas      — data logging CSV
-  pyserial    — envoi MWV vers MiniPlex (port USB)
+  websockets  — client Signal K WebSocket (InstrumentData + AIS vessels)
+  filterpy    — filtre de Kalman 1D (fusion BNO055 10Hz + vent 1Hz)
+  smbus2      — lecture BNO055 (IMU) et BMP280 (baromètre) via I2C
+  xgboost     — modèle polaires (entraînement + inférence target STW)
+  pyserial    — envoi MWV vers TP22 via MiniPlex Out1
+
+Interface : webapp/index.html — UI responsive (tablet/mobile)
+              └── Fonts : Barlow Condensed, Archivo, IBM Plex Mono
+              └── Thème jour (beige/or) + nuit (bleu-nuit/or)
+              └── AWA compass SVG animé, AIS radar + table, alertes
 
 Outils dev : socat (ports série virtuels pour simuler Out1→TP22 à la maison)
 ```
@@ -145,12 +149,14 @@ Outils dev : socat (ports série virtuels pour simuler Out1→TP22 à la maison)
 - [ ] Flash OpenPlotter sur Pi 5
 - [ ] Configurer Signal K : source TCP en dev, source USB MiniPlex en prod
 - [ ] Configurer WiFi AP `Centrale_DIY` @ 10.10.10.1
-- [ ] Connecter BNO055 sur I2C, valider lecture gîte/tangage
-- [ ] Connecter GPS Neo-M9N USB, valider 10 Hz
+- [ ] Connecter BNO055 sur I2C (X→étrave, Z→zénith), valider lecture gîte/tangage
+- [ ] Connecter BMP280 sur I2C (SDO→GND pour adresse 0x76)
+- [ ] Connecter GPS Neo-M9N USB (`/dev/ttyUSB1`), valider 9600 bauds
 - [ ] Premier passage bateau : brancher MiniPlex USB, valider remontée GX2200 + Loch + NASA
 - [ ] Configurer table routage MiniPlex + Override Out1
 - [ ] Valider Navionics : GPS + AIS affichés via Pi
-- [ ] Lancer data logging CSV : `TWS, TWA, STW, gîte, timestamp`
+- [ ] Ouvrir `http://10.10.10.1:8080` sur tablette : instruments live + AIS cibles
+- [ ] Lancer data logging CSV : `TWS, TWA, STW, gîte, pression, timestamp`
 
 ### Jalon 2 — Collecte des données & modèle polaires
 **Objectif :** polaire réelle du bateau entraînée et opérationnelle.

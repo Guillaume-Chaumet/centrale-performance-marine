@@ -6,7 +6,8 @@ IS_PI = platform.machine().startswith("aarch") or os.path.exists("/proc/device-t
 
 # Signal K
 SIGNALK_HOST = os.getenv("SIGNALK_HOST", "localhost")
-SIGNALK_PORT = int(os.getenv("SIGNALK_PORT", "10110"))
+SIGNALK_WS_PORT = int(os.getenv("SIGNALK_WS_PORT", "3000"))    # WebSocket API
+SIGNALK_NMEA_PORT = int(os.getenv("SIGNALK_NMEA_PORT", "10110"))  # TCP NMEA input (simulateur)
 
 # Port série MiniPlex → Pi (USB)
 MINIPLEX_PORT = os.getenv("MINIPLEX_PORT", "/dev/ttyACM0" if IS_PI else None)
@@ -20,9 +21,12 @@ TP22_BAUD = 4800
 IMU_I2C_ADDRESS = 0x28
 IMU_SAMPLE_RATE_HZ = 10
 
-# GPS backup
+# Baromètre BMP280 (I2C) — SDO→GND = 0x76, SDO→VCC = 0x77
+BARO_I2C_ADDRESS = int(os.getenv("BARO_I2C_ADDRESS", "0x76"), 16)
+
+# GPS backup (USB GNSS dongle)
 GPS_PORT = os.getenv("GPS_PORT", "/dev/ttyUSB1" if IS_PI else None)
-GPS_BAUD = 115200
+GPS_BAUD = int(os.getenv("GPS_BAUD", "9600"))
 
 # Data logging
 LOG_DIR = os.getenv("LOG_DIR", "data")

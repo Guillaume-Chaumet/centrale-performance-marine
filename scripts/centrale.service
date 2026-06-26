@@ -1,0 +1,17 @@
+[Unit]
+Description=Centrale de Performance Marine
+After=network.target signalk.service
+Wants=signalk.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/centrale
+ExecStart=/home/pi/centrale/venv/bin/python main.py --mode auto
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
