@@ -79,3 +79,49 @@ def _fmt(val, decimals: int = 2) -> str:
     if val is None:
         return ""
     return f"{val:.{decimals}f}"
+
+
+TELEMETRY_FIELDS = [
+    "timestamp", "awa_deg", "aws_kts", "twa_deg", "tws_kts",
+    "stw_kts", "sog_kts", "heel_deg", "vmg", "rendement",
+    "pressure_hpa", "temperature_c", "polar_rec",
+]
+
+
+class TelemetryLogger:
+    """Enregistre en continu tous les capteurs (1 pt/10s).
+    Un fichier par démarrage du programme — une session = un fichier."""
+
+    def __init__(self):
+        os.makedirs(config.LOG_DIR, exist_ok=True)
+        filename = datetime.utcnow().strftime("%Y-%m-%d_%Hh%M") + "_telemetry.csv"
+        self._path = os.path.join(config.LOG_DIR, filename)
+        self._file = open(self._path, "w", newline="")
+        self._writer = csv.DictWriter(self._file, fieldnames=TELEMETRY_FIELDS)
+        self._writer.writeheader()
+        self._file.flush()
+
+    def write(self, data: InstrumentData, awa_filtered: float | None,
+              vmg: float | None, rendement: float | None,
+              roll: float | None, pressure_hpa: float | None,
+              temperature_c: float | None, polar_rec: bool):
+        self._writer.writerow({
+            "timestamp":     datetime.utcnow().isoformat(),
+            "awa_deg":       _fmt(awa_filtered),
+            "aws_kts":       _fmt(data.aws_kts),
+            "twa_deg":       _fmt(data.twa_deg),
+            "tws_kts":       _fmt(data.tws_kts),
+            "stw_kts":       _fmt(data.stw_kts),
+            "sog_kts":       _fmt(data.sog_kts),
+            "heel_deg":      _fmt(roll),
+            "vmg":           _fmt(vmg),
+            "rendement":     _fmt(rendement, 3),
+            "pressure_hpa":  _fmt(pressure_hpa, 1),
+            "temperature_c": _fmt(temperature_c, 1),
+            "polar_rec":     "1" if polar_rec else "0",
+        })
+        self._file.flush()
+
+    def close(self):
+        if self._file and not self._file.closed:
+            self._file.close()

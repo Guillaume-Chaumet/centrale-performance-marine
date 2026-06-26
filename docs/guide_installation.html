@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Centrale de Performance Marine — Guide d'installation</title>
+<style>
+  :root {
+    --blue: #1a4a6e;
+    --light-blue: #2d7ab8;
+    --accent: #e8b54a;
+    --text: #1a1a2e;
+    --muted: #5a6a7a;
+    --bg-note: #f0f6ff;
+    --bg-warn: #fff8e8;
+    --bg-danger: #fff0f0;
+    --border: #d0dde8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0d2137 0%, #1a4a6e 60%, #2d7ab8 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 50px;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .cover-icon {
+    font-size: 64px;
+    margin-bottom: 30px;
+  }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .cover h1 span { color: var(--accent); }
+  .cover .subtitle {
+    font-size: 16px;
+    opacity: 0.75;
+    margin-bottom: 50px;
+    font-weight: 400;
+  }
+  .cover-chips {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+  }
+  .chip {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .cover-footer {
+    margin-top: auto;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 11px;
+    opacity: 0.5;
+  }
+
+  /* ── TABLE DES MATIÈRES ── */
+  .toc {
+    padding: 50px 50px 40px;
+    page-break-after: always;
+  }
+  .toc h2 { font-size: 22px; color: var(--blue); margin-bottom: 30px; }
+  .toc-section { margin-bottom: 6px; }
+  .toc-section a {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    text-decoration: none;
+    color: var(--text);
+    padding: 6px 0;
+    border-bottom: 1px dotted var(--border);
+    font-size: 13px;
+  }
+  .toc-section a:hover { color: var(--light-blue); }
+  .toc-number { color: var(--muted); font-size: 11px; }
+  .toc-sub { padding-left: 20px; }
+  .toc-sub a { font-size: 12px; color: var(--muted); }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 50px 50px 40px;
+    page-break-before: always;
+  }
+  .section:first-of-type { page-break-before: auto; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 30px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--blue);
+  }
+  .section-num {
+    background: var(--blue);
+    color: white;
+    font-size: 18px;
+    font-weight: 800;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 22px; font-weight: 700; color: var(--blue); }
+  .section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue);
+    margin: 28px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  h3:first-child { margin-top: 0; }
+
+  p { margin-bottom: 10px; }
+
+  /* ── NOTES ── */
+  .note, .warn, .danger, .tip {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    border-left: 4px solid;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .note  { background: var(--bg-note);   border-color: var(--light-blue); }
+  .warn  { background: var(--bg-warn);   border-color: var(--accent);     }
+  .danger{ background: var(--bg-danger); border-color: #e05050;           }
+  .note strong, .warn strong, .danger strong, .tip strong {
+    display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .note strong  { color: var(--light-blue); }
+  .warn strong  { color: #b88a00; }
+  .danger strong{ color: #c03030; }
+
+  /* ── MATÉRIEL TABLE ── */
+  .hardware-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .hw-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    background: #fafcff;
+  }
+  .hw-card .hw-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .hw-card .hw-ref  { font-size: 11px; color: var(--muted); font-family: monospace; margin-bottom: 6px; }
+  .hw-card .hw-note { font-size: 11.5px; color: #444; }
+  .hw-card .hw-optional {
+    display: inline-block;
+    background: #f0f4f0;
+    color: #5a7a5a;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .hw-card .hw-jalon {
+    display: inline-block;
+    background: #f0e8ff;
+    color: #6040a0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+
+  /* ── BRANCHEMENTS ── */
+  .pinout {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 12px;
+  }
+  .pinout table { width: 100%; border-collapse: collapse; }
+  .pinout th {
+    background: var(--blue);
+    color: white;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pinout td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .pinout tr:last-child td { border-bottom: none; }
+  .pinout tr:nth-child(even) td { background: #f8fbff; }
+  .pin-num {
+    display: inline-block;
+    background: var(--blue);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 28px;
+    text-align: center;
+    font-family: monospace;
+  }
+  .pin-signal {
+    background: #f0ffe8;
+    border: 1px solid #90c870;
+    color: #407020;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+  .pin-power {
+    background: #fff0f0;
+    border: 1px solid #e08080;
+    color: #903030;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+  .pin-gnd {
+    background: #f0f0f0;
+    border: 1px solid #999;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+  .pin-i2c {
+    background: #fff8e0;
+    border: 1px solid #d0a830;
+    color: #805010;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  /* ── SCHÉMA FILAIRE ASCII ── */
+  .wiring-diagram {
+    background: #0d1f30;
+    color: #7ecfff;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 16px 0;
+    white-space: pre;
+    overflow: hidden;
+  }
+  .wiring-diagram .w-green  { color: #7ac770; }
+  .wiring-diagram .w-yellow { color: #e8c84a; }
+  .wiring-diagram .w-red    { color: #e87060; }
+  .wiring-diagram .w-gray   { color: #8898a8; }
+  .wiring-diagram .w-white  { color: #e0eeff; }
+
+  /* ── CODE / TERMINAL ── */
+  .terminal {
+    background: #0d1f30;
+    color: #a8d8ea;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 16px 18px;
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow-wrap: break-word;
+  }
+  .terminal .prompt { color: #e8b54a; user-select: none; }
+  .terminal .comment { color: #5a7a8a; font-style: italic; }
+  .terminal .out { color: #6aaa80; }
+
+  /* ── STEPS ── */
+  .steps { margin: 16px 0; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    background: var(--accent);
+    color: white;
+    font-weight: 800;
+    font-size: 13px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body strong { display: block; font-size: 13px; margin-bottom: 3px; }
+  .step-body p { font-size: 12.5px; color: #333; margin: 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    list-style: none;
+    margin: 12px 0;
+  }
+  .checklist li {
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checkbox {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+
+  /* ── JALONS ── */
+  .jalons {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .jalon {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .jalon .j-num {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--blue);
+    opacity: 0.3;
+    margin-bottom: 6px;
+  }
+  .jalon .j-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .jalon .j-desc { font-size: 11.5px; color: var(--muted); }
+  .jalon.active { border-color: var(--accent); background: var(--bg-warn); }
+  .jalon.active .j-num { color: var(--accent); opacity: 1; }
+
+  /* ── ARCHITECTURE ── */
+  .arch-box {
+    background: #f0f6ff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: monospace;
+    font-size: 11.5px;
+    line-height: 1.8;
+    margin: 16px 0;
+    color: #1a2a3a;
+    white-space: pre;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { max-width: 100%; }
+    .section { page-break-before: always; padding: 30px 40px; }
+    .cover { min-height: 100vh; }
+    .toc { page-break-after: always; }
+    a { color: inherit; text-decoration: none; }
+    .terminal, .wiring-diagram, .arch-box { break-inside: avoid; }
+    .hw-card, .step, .jalon { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ COUVERTURE -->
+<div class="cover">
+  <div class="cover-icon">⛵</div>
+  <h1>Centrale de<br><span>Performance Marine</span></h1>
+  <p class="subtitle">Guide d'installation complet — Hardware &amp; Software</p>
+  <div class="cover-chips">
+    <span class="chip">Raspberry Pi 5</span>
+    <span class="chip">MiniPlex-3USB</span>
+    <span class="chip">Signal K</span>
+    <span class="chip">IMU BNO055</span>
+    <span class="chip">BMP280</span>
+    <span class="chip">Neo-M9N GPS</span>
+    <span class="chip">OpenPlotter</span>
+  </div>
+  <div class="cover-footer">
+    Projet personnel · Voilier 10m · NMEA 0183 · Simrad TP22
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ TABLE DES MATIÈRES -->
+<div class="toc">
+  <h2>Table des matières</h2>
+
+  <div class="toc-section">
+    <a href="#s1"><span>1 — Vue d'ensemble du projet</span><span class="toc-number">3</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s2"><span>2 — Liste du matériel</span><span class="toc-number">4</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s3"><span>3 — Branchements</span><span class="toc-number">5</span></a>
+    <div class="toc-sub">
+      <a href="#s3-i2c"><span>3.1 — IMU BNO055 + Baromètre BMP280 (I2C)</span><span class="toc-number">5</span></a>
+      <a href="#s3-gps"><span>3.2 — GPS Neo-M9N (USB)</span><span class="toc-number">6</span></a>
+      <a href="#s3-mpx"><span>3.3 — MiniPlex-3USB (USB)</span><span class="toc-number">6</span></a>
+      <a href="#s3-tp22"><span>3.4 — Câble TP22 (Jalon 3)</span><span class="toc-number">7</span></a>
+    </div>
+  </div>
+  <div class="toc-section">
+    <a href="#s4"><span>4 — Installation de l'OS (OpenPlotter)</span><span class="toc-number">8</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s5"><span>5 — Configuration Signal K</span><span class="toc-number">9</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s6"><span>6 — Installation du code</span><span class="toc-number">10</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s7"><span>7 — Premier démarrage</span><span class="toc-number">11</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s8"><span>8 — Utilisation quotidienne</span><span class="toc-number">12</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s9"><span>9 — Résolution de problèmes</span><span class="toc-number">13</span></a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 1 - VUE ENSEMBLE -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <div class="section-title">Vue d'ensemble du projet</div>
+      <div class="section-sub">Ce qu'on construit et pourquoi</div>
+    </div>
+  </div>
+
+  <p>Ce projet transforme un Raspberry Pi 5 en <strong>boîte noire de performance marine</strong> : il récupère toutes les données des instruments du voilier (vent, vitesse, GPS, cap...) via le réseau NMEA 0183 et les analyse en temps réel.</p>
+
+  <h3>Architecture globale</h3>
+  <div class="arch-box">MiniPlex-3USB ←── Instruments NMEA (GX2200, speedo, girouette...)
+      │
+      │ USB-B
+      ▼
+  Raspberry Pi 5
+      │
+      ├── Signal K (port 3000) ── lit le MiniPlex
+      │
+      └── Notre code Python
+              ├── Kalman AWA filtré
+              ├── Polaires XGBoost
+              ├── Logs CSV (data/)
+              └── Web UI :8080 ── Tablette / Téléphone</div>
+
+  <h3>Les trois jalons</h3>
+  <div class="jalons">
+    <div class="jalon active">
+      <div class="j-num">1</div>
+      <div class="j-title">Logging</div>
+      <div class="j-desc">Données remontent, CSV généré, historique dans l'UI</div>
+    </div>
+    <div class="jalon">
+      <div class="j-num">2</div>
+      <div class="j-title">Polaires</div>
+      <div class="j-desc">Collecte en mer, entraînement XGBoost, rendement en temps réel</div>
+    </div>
+    <div class="jalon">
+      <div class="j-num">3</div>
+      <div class="j-title">Auto-pilote</div>
+      <div class="j-desc">Filtre Kalman actif, câble TP22 branché, mode automatique</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>📍 Où en sommes-nous ?</strong>
+    Le code est complet pour le Jalon 1. Le Pi vient d'être récupéré — l'objectif de ce guide est de tout installer et tester en mer pour la première fois.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 2 - MATÉRIEL -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div>
+      <div class="section-title">Liste du matériel</div>
+      <div class="section-sub">Ce qu'il faut avoir avant de commencer</div>
+    </div>
+  </div>
+
+  <div class="hardware-grid">
+    <div class="hw-card">
+      <div class="hw-name">Raspberry Pi 5</div>
+      <div class="hw-ref">4GB ou 8GB RAM</div>
+      <div class="hw-note">Le cerveau du système. 8GB si budget le permet — plus confortable pour Signal K + notre code en simultané.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Carte microSD</div>
+      <div class="hw-ref">32GB minimum, Classe 10 / A2</div>
+      <div class="hw-note">Sandisk Extreme ou Samsung Pro Endurance recommandées. <strong>Pas de carte no-name</strong> — les corruptions en mer sont fatales.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Alimentation Pi 5</div>
+      <div class="hw-ref">USB-C, 5V / 5A (27W)</div>
+      <div class="hw-note">L'alimentation officielle Raspberry Pi ou équivalente. Le Pi 5 est gourmand — une alimentation sous-dimensionnée provoque des instabilités.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">MiniPlex-3USB</div>
+      <div class="hw-ref">actisense / ShipModul</div>
+      <div class="hw-note">Déjà à bord. Concentrateur NMEA 0183 — reçoit tous les instruments et les transmet au Pi via USB.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">IMU BNO055</div>
+      <div class="hw-ref">Adafruit #2472 ou clone</div>
+      <div class="hw-note">Centrale inertielle 9 axes — mesure le roulis (gîte) pour corriger le vent apparent. Connexion I2C.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Baromètre BMP280</div>
+      <div class="hw-ref">Breakout board (Adafruit ou clone)</div>
+      <div class="hw-note">Pression atmosphérique + température. Alerte dépression si −3 hPa en 3h. Connexion I2C.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">GPS USB Neo-M9N</div>
+      <div class="hw-ref">u-blox Neo-M9N dongle USB</div>
+      <div class="hw-note">GPS de secours si Signal K n'a pas de fix. Thread daemon — activé automatiquement si besoin.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Câbles Dupont F-F</div>
+      <div class="hw-ref">4 fils, ~20cm</div>
+      <div class="hw-note">Pour connecter BNO055 et BMP280 au port GPIO du Pi. Femelle-femelle si les modules ont des headers mâles.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Câble USB-A → USB-B</div>
+      <div class="hw-ref">Standard imprimante</div>
+      <div class="hw-note">Pi (USB-A hôte) → MiniPlex (USB-B appareil). Le Pi 5 a 4 ports USB-A.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Câble NMEA TP22</div>
+      <div class="hw-ref">2 fils, ~1m</div>
+      <div class="hw-note"><span class="hw-jalon">Jalon 3</span> Out1-A MiniPlex → Signal/Rouge TP22. Out1-B → Commun/Bleu TP22.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Boîtier / fixation</div>
+      <div class="hw-ref">Case Pi 5 ventilé</div>
+      <div class="hw-note"><span class="hw-optional">Recommandé</span> L'environnement marin est humide. Un boîtier fermé avec ventilation active protège le Pi.</div>
+    </div>
+    <div class="hw-card">
+      <div class="hw-name">Switch réseau / WiFi</div>
+      <div class="hw-ref">Petit routeur 12V ou hotspot</div>
+      <div class="hw-note"><span class="hw-optional">Optionnel</span> Pour accéder à l'UI depuis tablette/téléphone à bord. Un hotspot suffit si le Pi est en mode AP.</div>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>⚠️ Point critique</strong>
+    Le BNO055 et le BMP280 partagent le même bus I2C (4 fils). Ils ont des adresses différentes (0x28 et 0x76) donc pas de conflit — mais câbler les 4 fils en parallèle (VCC, GND, SDA, SCL) sur les deux modules en même temps.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 3 - BRANCHEMENTS -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div>
+      <div class="section-title">Branchements</div>
+      <div class="section-sub">Connexions physiques, pin par pin</div>
+    </div>
+  </div>
+
+  <div id="s3-i2c">
+    <h3>3.1 — IMU BNO055 + Baromètre BMP280 (I2C)</h3>
+
+    <p>Les deux modules se branchent en <strong>parallèle sur les mêmes 4 broches GPIO</strong> du Pi 5. Les 4 fils sont identiques pour les deux.</p>
+
+    <div class="pinout">
+      <table>
+        <tr>
+          <th>Broche Pi 5 (Header 40 pins)</th>
+          <th>Signal</th>
+          <th>Fil BNO055</th>
+          <th>Fil BMP280</th>
+        </tr>
+        <tr>
+          <td><span class="pin-num">Pin 1</span></td>
+          <td><span class="pin-power">3.3V</span></td>
+          <td>VCC / VIN</td>
+          <td>VCC / VIN</td>
+        </tr>
+        <tr>
+          <td><span class="pin-num">Pin 6</span></td>
+          <td><span class="pin-gnd">GND</span></td>
+          <td>GND</td>
+          <td>GND · SDO→GND (= adresse 0x76)</td>
+        </tr>
+        <tr>
+          <td><span class="pin-num">Pin 3</span></td>
+          <td><span class="pin-i2c">SDA (GPIO2)</span></td>
+          <td>SDA</td>
+          <td>SDA / SDI</td>
+        </tr>
+        <tr>
+          <td><span class="pin-num">Pin 5</span></td>
+          <td><span class="pin-i2c">SCL (GPIO3)</span></td>
+          <td>SCL / SCK</td>
+          <td>SCL / SCK</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="note">
+      <strong>📌 Adresses I2C</strong>
+      BNO055 = 0x28 (fixe) · BMP280 = 0x76 si SDO→GND, 0x77 si SDO→VCC. Par défaut le code utilise 0x76. Si tu branches SDO→VCC, ajouter <code>BARO_I2C_ADDRESS=0x77</code> dans l'environnement.
+    </div>
+
+    <div class="note">
+      <strong>🧭 Orientation du BNO055</strong>
+      Monter le capteur avec X pointant vers l'étrave, Y vers bâbord/tribord, Z vers le haut (zénith). Le roulis mesuré correspond à la gîte du bateau.
+    </div>
+  </div>
+
+  <div id="s3-gps">
+    <h3>3.2 — GPS Neo-M9N (USB)</h3>
+    <p>Connexion USB directe sur le Pi. Aucune configuration nécessaire — le Pi l'identifie automatiquement comme port série <code>/dev/ttyUSB1</code>.</p>
+    <div class="warn">
+      <strong>⚠️ Ordre des ports USB</strong>
+      Le MiniPlex prend généralement <code>/dev/ttyACM0</code> et le GPS <code>/dev/ttyUSB1</code>. Si les ports ne correspondent pas, ajuste les variables d'environnement <code>MINIPLEX_PORT</code> et <code>GPS_PORT</code>.
+    </div>
+  </div>
+
+  <div id="s3-mpx">
+    <h3>3.3 — MiniPlex-3USB (USB)</h3>
+    <p>Câble USB-A (Pi) → USB-B (MiniPlex). Le Pi 5 a 4 ports USB-A, utilise l'un d'eux. Le MiniPlex apparaît comme <code>/dev/ttyACM0</code> sur le Pi — Signal K s'en charge automatiquement.</p>
+
+    <div class="danger">
+      <strong>🚨 Règle de routage MiniPlex critique</strong>
+      <strong>GX2200 (VHF/AIS) sur In1 uniquement</strong> — jamais sur In4. In4 est lié à la vitesse de Out1, et le GX2200 envoie à 38400 bauds ce qui perturberait le TP22 (4800 bauds).<br><br>
+      <strong>Out1 en mode Override</strong> — quand le Pi envoie des données au TP22, il a la priorité exclusive sur Out1. Si le Pi s'arrête, le MiniPlex rebascule automatiquement vers les données brutes après 10 secondes.
+    </div>
+  </div>
+
+  <div id="s3-tp22">
+    <h3>3.4 — Câble TP22 <span style="background:#f0e8ff;color:#6040a0;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle;">JALON 3</span></h3>
+    <p>À faire pour le Jalon 3. Le TP22 est actuellement en mode compas seul — brancher ce câble pour activer le mode Conservateur d'Allure (suit l'angle de vent apparent via NMEA).</p>
+
+    <div class="pinout">
+      <table>
+        <tr>
+          <th>MiniPlex Out1</th>
+          <th>Fil</th>
+          <th>TP22</th>
+        </tr>
+        <tr>
+          <td>Out1-A</td>
+          <td>Signal</td>
+          <td>Signal / Rouge</td>
+        </tr>
+        <tr>
+          <td>Out1-B</td>
+          <td>Commun</td>
+          <td>Commun / Bleu</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="warn">
+      <strong>⚠️ Un seul émetteur vers Out1</strong>
+      Ne pas router d'autres sources NMEA vers Out1 — le mode Override du MiniPlex gère l'exclusivité. Si d'autres sources sont routées vers Out1 en même temps, le TP22 recevra des données conflictuelles.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 4 - OS -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div>
+      <div class="section-title">Installation de l'OS (OpenPlotter)</div>
+      <div class="section-sub">Flasher la carte SD et configurer le Pi</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Télécharger l'image OpenPlotter Starting</strong>
+        <p>Aller sur <strong>openplotter.cc → Downloads</strong> et télécharger <em>OpenPlotter Starting</em> pour Raspberry Pi 4/5. C'est une Raspberry Pi OS avec Signal K et tout le nécessaire pré-installé.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Flasher la carte SD avec Raspberry Pi Imager</strong>
+        <p>Télécharger <strong>Raspberry Pi Imager</strong> (rpi.imager.org), sélectionner "Use custom" et choisir l'image OpenPlotter téléchargée. Avant de flasher, cliquer sur l'icône ⚙️ pour préconfigurer :</p>
+        <ul style="margin: 8px 0 0 16px; font-size: 12px; line-height: 1.8;">
+          <li>Nom d'hôte : <code>openplotter</code> (ou ce que tu veux)</li>
+          <li>Activer SSH</li>
+          <li>Nom WiFi + mot de passe de ton hotspot à bord</li>
+          <li>Nom d'utilisateur : <code>pi</code>, choisir un mot de passe</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Premier démarrage</strong>
+        <p>Insérer la SD, brancher le Pi, attendre 2 minutes. Se connecter en SSH depuis ton Mac :</p>
+        <div class="terminal">
+<span class="prompt">$</span> ssh pi@openplotter.local
+<span class="comment"># ou avec l'IP directement : ssh pi@192.168.x.x</span></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Activer l'interface I2C</strong>
+        <p>L'I2C est désactivé par défaut — il faut l'activer pour que le Pi puisse communiquer avec BNO055 et BMP280.</p>
+        <div class="terminal">
+<span class="prompt">$</span> sudo raspi-config
+<span class="comment"># → Interface Options → I2C → Enable → OK → Finish</span>
+<span class="prompt">$</span> sudo reboot</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <strong>Vérifier que les capteurs I2C sont détectés</strong>
+        <p>Après reboot, brancher BNO055 et BMP280, puis :</p>
+        <div class="terminal">
+<span class="prompt">$</span> sudo apt install i2c-tools -y
+<span class="prompt">$</span> i2cdetect -y 1
+<span class="out">     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- 28 -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+70: -- -- -- -- -- -- 76 --</span>
+<span class="comment"># 0x28 = BNO055 ✓  |  0x76 = BMP280 ✓</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>💡 Accès sans écran</strong>
+    Toute la configuration se fait en SSH depuis ton Mac. Tu n'as pas besoin d'écran ni de clavier branchés sur le Pi.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 5 - SIGNAL K -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div>
+      <div class="section-title">Configuration Signal K</div>
+      <div class="section-sub">Le concentrateur de données NMEA</div>
+    </div>
+  </div>
+
+  <p>Signal K est déjà installé avec OpenPlotter. Il tourne sur le port 3000 et lit le MiniPlex-3USB. Notre code Python se connecte à Signal K via WebSocket — on ne lit jamais le port USB directement.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Accéder à l'interface Signal K</strong>
+        <p>Dans un navigateur sur le même réseau que le Pi :</p>
+        <div class="terminal">http://openplotter.local:3000</div>
+        <p style="margin-top:6px">Login : admin / admin (à changer !)</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Ajouter la connexion MiniPlex</strong>
+        <p>Aller dans <strong>Server → Connections → Add</strong> et configurer :</p>
+        <ul style="margin: 8px 0 0 16px; font-size: 12px; line-height: 1.8;">
+          <li>Type : <strong>Serial</strong></li>
+          <li>Device : <strong>/dev/ttyACM0</strong></li>
+          <li>Baud rate : <strong>38400</strong></li>
+          <li>Data type : NMEA 0183</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Vérifier que les données arrivent</strong>
+        <p>Aller dans <strong>Signal K → Vessel Data</strong>. Tu dois voir les données de vent, vitesse, position se mettre à jour en temps réel si le MiniPlex est branché et les instruments allumés.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Activer le démarrage automatique</strong>
+        <p>OpenPlotter configure Signal K pour démarrer au boot automatiquement. Vérifier avec :</p>
+        <div class="terminal">
+<span class="prompt">$</span> sudo systemctl status signalk
+<span class="out">● signalk.service - Signal K server
+   Active: active (running) since ...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>⚠️ Si Signal K ne démarre pas</strong>
+    Vérifier les logs : <code>sudo journalctl -u signalk -n 50</code>. Le problème le plus courant est un conflit de port avec le MiniPlex — vérifier que le port <code>/dev/ttyACM0</code> est bien accessible.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 6 - CODE -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div>
+      <div class="section-title">Installation du code</div>
+      <div class="section-sub">Cloner le dépôt et installer les dépendances</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Cloner le dépôt Git</strong>
+        <div class="terminal">
+<span class="prompt">$</span> cd ~
+<span class="prompt">$</span> git clone https://github.com/Guillaume-Chaumet/voile.git
+<span class="prompt">$</span> cd voile</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Lancer le script de setup Pi (une seule fois)</strong>
+        <p>Ce script installe les dépendances Python, active les droits sur le port série, configure les services.</p>
+        <div class="terminal">
+<span class="prompt">$</span> bash scripts/setup_pi.sh</div>
+        <p style="margin-top:6px;font-size:12px;">Le script fait : <code>pip install -r requirements.txt</code>, ajoute l'utilisateur au groupe <code>dialout</code> (accès série), crée les dossiers <code>data/</code> et <code>models/</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Vérifier la détection d'environnement</strong>
+        <p>Le code détecte automatiquement qu'il tourne sur Pi :</p>
+        <div class="terminal">
+<span class="prompt">$</span> python -c "import config; print('Pi :', config.IS_PI)"
+<span class="out">Pi : True</span></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Test rapide des capteurs I2C</strong>
+        <div class="terminal">
+<span class="prompt">$</span> python -c "from src.imu import IMU; imu = IMU(); print(imu.read())"
+<span class="out">(roll=2.1, pitch=0.3, heading=247.0)</span>
+<span class="prompt">$</span> python -c "from src.barometer import Barometer; b = Barometer(); print(b.read())"
+<span class="out">{'pressure_hpa': 1013.2, 'temperature_c': 22.4}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>📦 Dépendances principales</strong>
+    <code>websockets</code> · <code>numpy</code> · <code>smbus2</code> (I2C) · <code>pyserial</code> · <code>xgboost</code> · <code>scikit-learn</code> · <code>pandas</code>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 7 - PREMIER DÉMARRAGE -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div>
+      <div class="section-title">Premier démarrage</div>
+      <div class="section-sub">Lancer le système et vérifier que tout fonctionne</div>
+    </div>
+  </div>
+
+  <h3>Démarrer manuellement (pour tester)</h3>
+  <div class="terminal">
+<span class="comment"># 1. Vérifier que Signal K tourne</span>
+<span class="prompt">$</span> sudo systemctl status signalk
+
+<span class="comment"># 2. Lancer notre code en mode logging</span>
+<span class="prompt">$</span> python main.py --mode log
+
+<span class="out">UI → http://10.10.10.1:8080  (dev : http://localhost:8080)
+[SignalK] Connexion ws://localhost:3000/signalk/v1/stream
+[SignalK] Données reçues — AWA: 42.3°  AWS: 12.4 kts  STW: 6.1 kts
+[Telemetry] Session → data/2024-06-26_14h32_telemetry.csv
+...</span></div>
+
+  <h3>Démarrer tout en une commande (production)</h3>
+  <div class="terminal">
+<span class="prompt">$</span> bash scripts/start.sh</div>
+
+  <h3>Accéder à l'interface Web</h3>
+  <p>Depuis la tablette ou le téléphone connecté au même réseau WiFi que le Pi :</p>
+  <div class="terminal">http://openplotter.local:8080
+<span class="comment"># ou avec l'IP : http://192.168.x.x:8080</span></div>
+
+  <div class="note">
+    <strong>📱 Réseau à bord</strong>
+    Le Pi peut créer un hotspot WiFi autonome (via OpenPlotter → WiFi Hotspot). L'IP sera alors <code>10.10.10.1</code> et l'UI accessible sur <code>http://10.10.10.1:8080</code>.
+  </div>
+
+  <h3>Checklist de validation</h3>
+  <ul class="checklist">
+    <li><span class="checkbox"></span>Signal K démarre automatiquement au boot</li>
+    <li><span class="checkbox"></span>L'UI est accessible depuis la tablette</li>
+    <li><span class="checkbox"></span>AWA, AWS, STW s'affichent et se mettent à jour</li>
+    <li><span class="checkbox"></span>La gîte (roulis IMU) s'affiche dans l'UI</li>
+    <li><span class="checkbox"></span>La pression baro et la température s'affichent</li>
+    <li><span class="checkbox"></span>Le fichier CSV telemetry est créé dans <code>data/</code></li>
+    <li><span class="checkbox"></span>L'onglet Historique montre les graphiques</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 8 - UTILISATION -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div>
+      <div class="section-title">Utilisation quotidienne</div>
+      <div class="section-sub">Comment se servir du système en mer</div>
+    </div>
+  </div>
+
+  <h3>Démarrer une sortie</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Allumer le Pi</strong>
+        <p>Le Pi démarre automatiquement Signal K et notre code au boot. Attendre ~60 secondes après l'allumage.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Ouvrir l'UI sur la tablette</strong>
+        <p>Connecter la tablette au WiFi du Pi, puis ouvrir <code>http://10.10.10.1:8080</code>. Ajouter le favori sur l'écran d'accueil pour un accès rapide.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Vérifier les données (voyant "LIVE" vert)</strong>
+        <p>L'indicateur en haut de l'UI doit être vert. Si rouge, Signal K ne reçoit pas de données — vérifier que le MiniPlex est branché et les instruments allumés.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Enregistrement pour les polaires</h3>
+  <div class="note">
+    <strong>📊 Deux types d'enregistrement</strong>
+    <strong>Automatique (toujours actif) :</strong> toutes les données sont enregistrées en CSV toutes les 10 secondes dès le démarrage du Pi. Pas besoin de faire quoi que ce soit.<br><br>
+    <strong>Manuel (bouton REC) :</strong> active l'enregistrement spécifique pour l'entraînement des polaires ML. À n'utiliser que lors de sorties voile réelles, pas pendant la pêche ou au mouillage.
+  </div>
+  <p>Appuyer sur <strong>REC</strong> dans l'UI au départ, choisir la configuration de voile (<em>GV + Génois</em>, <em>GV + Spi</em>...), puis <strong>STOP</strong> à l'arrivée. Ces données servent à entraîner le modèle polaire ML pour le Jalon 2.</p>
+
+  <h3>Consulter l'historique</h3>
+  <p>Aller dans l'onglet <strong>Historique</strong>. Sélectionner une session dans le menu déroulant. Les graphiques de 11 paramètres s'affichent : AWA, AWS, TWA, TWS, STW, SOG, VMG, Gîte, Rendement, Pression, Température.</p>
+
+  <h3>Arrêter proprement</h3>
+  <div class="terminal">
+<span class="prompt">$</span> sudo shutdown -h now
+<span class="comment"># Ou via OpenPlotter → Power → Shutdown</span></div>
+  <div class="warn">
+    <strong>⚠️ Ne pas débrancher brutalement</strong>
+    Toujours éteindre proprement avec <code>shutdown</code> pour éviter la corruption de la carte SD.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ 9 - DÉPANNAGE -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div>
+      <div class="section-title">Résolution de problèmes</div>
+      <div class="section-sub">Les pannes courantes et comment les corriger</div>
+    </div>
+  </div>
+
+  <h3>L'UI ne répond pas</h3>
+  <div class="terminal">
+<span class="comment"># Vérifier que le processus tourne</span>
+<span class="prompt">$</span> ps aux | grep main.py
+
+<span class="comment"># Vérifier les logs</span>
+<span class="prompt">$</span> sudo journalctl -u voile -n 50
+
+<span class="comment"># Redémarrer</span>
+<span class="prompt">$</span> sudo systemctl restart voile</div>
+
+  <h3>Signal K ne reçoit pas de données</h3>
+  <div class="terminal">
+<span class="comment"># Vérifier que le MiniPlex est reconnu</span>
+<span class="prompt">$</span> ls /dev/ttyACM*
+<span class="out">/dev/ttyACM0</span>
+
+<span class="comment"># Voir le flux NMEA brut</span>
+<span class="prompt">$</span> sudo cat /dev/ttyACM0</div>
+
+  <h3>Les capteurs I2C ne sont pas détectés</h3>
+  <div class="terminal">
+<span class="prompt">$</span> i2cdetect -y 1
+<span class="comment"># Si aucun appareil n'apparaît :</span>
+<span class="comment"># → Vérifier les câbles (surtout SDA et SCL)</span>
+<span class="comment"># → Vérifier que l'I2C est activé (raspi-config)</span>
+<span class="comment"># → Vérifier l'alimentation 3.3V sur Pin 1</span></div>
+
+  <h3>Ports USB mal attribués</h3>
+  <div class="terminal">
+<span class="prompt">$</span> ls /dev/ttyACM* /dev/ttyUSB*
+<span class="out">/dev/ttyACM0  /dev/ttyUSB1</span>
+
+<span class="comment"># Si les ports sont différents, les configurer :</span>
+<span class="prompt">$</span> export MINIPLEX_PORT=/dev/ttyACM1
+<span class="prompt">$</span> export GPS_PORT=/dev/ttyUSB0</div>
+
+  <h3>Vérifier le réseau WiFi</h3>
+  <div class="terminal">
+<span class="prompt">$</span> ip addr show wlan0
+<span class="comment"># Récupérer l'IP et l'utiliser dans le navigateur à la place de openplotter.local</span></div>
+
+  <h3>Commandes utiles de maintenance</h3>
+  <div class="terminal">
+<span class="comment"># Voir les derniers logs CSV</span>
+<span class="prompt">$</span> ls -la data/
+
+<span class="comment"># Espace disque disponible</span>
+<span class="prompt">$</span> df -h
+
+<span class="comment"># Température CPU (surveiller si dans un boîtier fermé)</span>
+<span class="prompt">$</span> vcgencmd measure_temp
+
+<span class="comment"># Mettre à jour le code depuis Git</span>
+<span class="prompt">$</span> git pull origin main</div>
+
+  <div class="note">
+    <strong>📞 En cas de problème persistant</strong>
+    Copier les logs (<code>sudo journalctl -u voile -n 200 > debug.txt</code>) et les analyser. La plupart des problèmes sont liés aux ports série ou à la connectivité WiFi.
+  </div>
+</div>
+
+</body>
+</html>

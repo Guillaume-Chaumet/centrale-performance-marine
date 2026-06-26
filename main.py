@@ -11,7 +11,7 @@ import config
 from src.signalk_client import SignalKClient
 from src.imu import IMU
 from src.kalman_wind import KalmanWind
-from src.data_logger import DataLogger
+from src.data_logger import DataLogger, TelemetryLogger
 from src.polar_model import PolarModel
 from src.autopilot import Autopilot
 from src.barometer import Barometer
@@ -94,6 +94,7 @@ def main():
     gps_backup = GPSBackup()
     kalman = KalmanWind()
     logger = DataLogger()
+    telemetry = TelemetryLogger()
 
     sail_config: str = args.sail
     polar = _load_polar(sail_config)
@@ -123,9 +124,12 @@ def main():
 
     print()
 
+    last_telemetry_s = 0.0
+
     def shutdown(sig, frame):
         print("\nArrêt propre...")
         logger.close()
+        telemetry.close()
         autopilot.close()
         sys.exit(0)
 
@@ -263,6 +267,13 @@ def main():
                     logger.stop()
                     rec_started_at = None
                     print("\r[rec] arrêté   ")
+
+        # ── Telemetry always-on (1 pt / 10s) ─────────────────────────────────
+        if now_wall - last_telemetry_s >= 10.0:
+            telemetry.write(data, awa_filtered, vmg, rendement, roll,
+                            baro_data["pressure_hpa"], baro_data["temperature_c"],
+                            logger.is_active)
+            last_telemetry_s = now_wall
 
         # ── Hot-reload polaire (thread réentraînement écrit sur disque) ───────
         if polar.reload_if_updated():

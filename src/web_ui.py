@@ -1,14 +1,57 @@
 import asyncio
+import csv
+import glob
 import json
+import os
 import threading
+from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 import websockets
+import config
 
 _HTML = Path(__file__).parent.parent / "webapp" / "index.html"
 HTTP_PORT = 8080
 WS_PORT = 8081
+
+
+def _list_sessions() -> bytes:
+    files = sorted(glob.glob(os.path.join(config.LOG_DIR, "*_telemetry.csv")), reverse=True)
+    sessions = []
+    for f in files:
+        try:
+            with open(f, newline="") as fh:
+                rows = list(csv.DictReader(fh))
+            if not rows:
+                continue
+            sessions.append({
+                "file":       os.path.basename(f),
+                "start":      rows[0]["timestamp"],
+                "end":        rows[-1]["timestamp"],
+                "n_points":   len(rows),
+                "duration_h": round(len(rows) * 10 / 3600, 1),
+                "has_polar":  any(r.get("polar_rec") == "1" for r in rows),
+            })
+        except Exception:
+            pass
+    return json.dumps(sessions).encode()
+
+
+def _build_history_file(filename: str) -> bytes:
+    if "/" in filename or "\\" in filename or not filename.endswith("_telemetry.csv"):
+        return json.dumps([]).encode()
+    path = os.path.join(config.LOG_DIR, filename)
+    rows = []
+    try:
+        with open(path, newline="") as fh:
+            rows = list(csv.DictReader(fh))
+    except Exception:
+        pass
+    if len(rows) > 600:
+        step = max(1, len(rows) // 600)
+        rows = rows[::step]
+    return json.dumps(rows).encode()
 
 
 class UIState:
@@ -73,14 +116,40 @@ class WebUI:
 
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):
-                try:
-                    body = html_path.read_bytes()
-                    self.send_response(200)
-                    self.send_header("Content-Type", "text/html; charset=utf-8")
-                    self.end_headers()
-                    self.wfile.write(body)
-                except Exception:
-                    self.send_error(404)
+                if self.path.startswith("/api/sessions"):
+                    try:
+                        body = _list_sessions()
+                        self.send_response(200)
+                        self.send_header("Content-Type", "application/json")
+                        self.send_header("Cache-Control", "no-cache")
+                        self.end_headers()
+                        self.wfile.write(body)
+                    except Exception:
+                        self.send_error(500)
+                elif self.path.startswith("/api/history"):
+                    try:
+                        params = self.path.split("?")[1] if "?" in self.path else ""
+                        if "file=" in params:
+                            fname = params.split("file=")[1].split("&")[0]
+                            body = _build_history_file(fname)
+                        else:
+                            body = json.dumps([]).encode()
+                        self.send_response(200)
+                        self.send_header("Content-Type", "application/json")
+                        self.send_header("Cache-Control", "no-cache")
+                        self.end_headers()
+                        self.wfile.write(body)
+                    except Exception:
+                        self.send_error(500)
+                else:
+                    try:
+                        body = html_path.read_bytes()
+                        self.send_response(200)
+                        self.send_header("Content-Type", "text/html; charset=utf-8")
+                        self.end_headers()
+                        self.wfile.write(body)
+                    except Exception:
+                        self.send_error(404)
 
             def log_message(self, *_):
                 pass
