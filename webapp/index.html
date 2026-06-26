@@ -37,6 +37,19 @@ button { font-family: 'Archivo', sans-serif; }
 <body>
 
 
+<!-- ── Modal extinction ─────────────────────────────────────────────── -->
+<div id="shutdown-modal" onclick="closeShutdownModal()" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 32px;max-width:320px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4)">
+    <div style="font-size:36px;margin-bottom:12px">⏻</div>
+    <div style="font:700 16px 'Archivo',sans-serif;color:var(--ink);margin-bottom:8px">Éteindre le Raspberry Pi ?</div>
+    <div style="font:400 13px 'IBM Plex Mono',monospace;color:var(--muted);margin-bottom:24px">Le système s'arrêtera proprement.<br>Attendre la LED verte fixe avant de couper l'alim.</div>
+    <div style="display:flex;gap:12px">
+      <button onclick="closeShutdownModal()" style="flex:1;padding:11px;border:1px solid var(--line);border-radius:8px;background:transparent;cursor:pointer;font:600 13px 'Archivo',sans-serif;color:var(--ink)">Annuler</button>
+      <button onclick="confirmShutdown()" style="flex:1;padding:11px;border:none;border-radius:8px;background:#c03030;cursor:pointer;font:600 13px 'Archivo',sans-serif;color:white">Éteindre</button>
+    </div>
+  </div>
+</div>
+
 <div id="stage">
 
 <!-- ═══════════════════ TABLET ═══════════════════ -->
@@ -55,6 +68,7 @@ button { font-family: 'Archivo', sans-serif; }
         <span id="t-rectext">CSV ARRÊTÉ</span>
       </span>
       <button onclick="toggleTheme()" id="t-thbtn" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--accent);border-radius:6px;padding:4px 11px;cursor:pointer;font:600 12px 'Archivo',sans-serif">☾ Nuit</button>
+      <button onclick="openShutdownModal()" title="Éteindre le Pi" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:#e87070;border-radius:6px;padding:4px 10px;cursor:pointer;font:600 14px 'Archivo',sans-serif;line-height:1">⏻</button>
       <span id="t-clock">--:--</span>
     </div>
   </div>
@@ -253,6 +267,7 @@ button { font-family: 'Archivo', sans-serif; }
     <span id="m-clock" style="font:500 11px 'IBM Plex Mono',monospace;color:var(--ink)">--:--</span>
     <span id="m-sk" style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted)">Signal K</span>
     <button onclick="toggleTheme()" id="m-thbtn" style="background:transparent;border:1px solid var(--line);color:var(--accent);border-radius:6px;padding:3px 9px;cursor:pointer;font:600 11px 'Archivo'">☾ Nuit</button>
+    <button onclick="openShutdownModal()" title="Éteindre le Pi" style="background:transparent;border:1px solid var(--line);color:#e87070;border-radius:6px;padding:3px 8px;cursor:pointer;font:600 13px 'Archivo';line-height:1">⏻</button>
   </div>
 
   <!-- alerts -->
@@ -482,6 +497,18 @@ function fmtDur(sec) {
   if (!sec) return '00:00:00';
   const s = Math.floor(sec), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
   return [h,m,ss].map(x => String(x).padStart(2,'0')).join(':');
+}
+
+// ── Shutdown ────────────────────────────────────────────────────────
+function openShutdownModal() {
+  const m = g('shutdown-modal'); m.style.display = 'flex';
+}
+function closeShutdownModal() {
+  g('shutdown-modal').style.display = 'none';
+}
+function confirmShutdown() {
+  closeShutdownModal();
+  send({type: 'shutdown'});
 }
 
 // ── Alerts ─────────────────────────────────────────────────────────

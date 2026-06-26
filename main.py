@@ -3,6 +3,7 @@ import glob
 import math
 import os
 import signal
+import subprocess
 import sys
 import threading
 import time
@@ -256,6 +257,14 @@ def main():
                 elif val == "disengage":
                     autopilot_active = False
                     print("\r[pilote] dégagé — MiniPlex rebascule dans 10s   ")
+
+            elif ctype == "shutdown":
+                print("\n[shutdown] Arrêt demandé depuis l'UI...")
+                logger.close()
+                telemetry.close()
+                autopilot.close()
+                subprocess.run(["sudo", "shutdown", "-h", "now"], check=False)
+                sys.exit(0)
 
             elif ctype == "recording":
                 val = cmd.get("value")
