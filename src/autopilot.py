@@ -15,7 +15,10 @@ class Autopilot:
         self._serial = None
         if config.TP22_PORT:
             import serial
-            self._serial = serial.Serial(config.TP22_PORT, config.TP22_BAUD, timeout=1)
+            try:
+                self._serial = serial.Serial(config.TP22_PORT, config.TP22_BAUD, timeout=1)
+            except serial.SerialException as e:
+                print(f"[Autopilot] Port TP22 absent ({config.TP22_PORT}) — mode simulation")
         self._current_awa: float | None = None
         self._last_sent: float = 0.0
 

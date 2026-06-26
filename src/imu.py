@@ -1,21 +1,33 @@
 import config
 
+import math
+
 if config.IS_PI:
     import smbus2
 
     class IMU:
         def __init__(self):
-            self.bus = smbus2.SMBus(1)
-            self.addr = config.IMU_I2C_ADDRESS
-            self._init_bno055()
+            self._stub = False
+            self._t = 0.0
+            try:
+                self.bus = smbus2.SMBus(1)
+                self.addr = config.IMU_I2C_ADDRESS
+                self._init_bno055()
+            except OSError:
+                print("[IMU] BNO055 absent — mode stub sinusoïdal")
+                self._stub = True
 
         def _init_bno055(self):
-            # Mode NDOF (fusion complète)
             self.bus.write_byte_data(self.addr, 0x3D, 0x0C)
 
         def read(self) -> dict:
-            """Retourne gîte (roll), tangage (pitch), cap (yaw) en degrés."""
-            # Registres Euler BNO055 : 0x1A-0x1F
+            if self._stub:
+                self._t += 0.1
+                return {
+                    "roll":  8.0 * math.sin(2 * math.pi * 0.2 * self._t),
+                    "pitch": 3.0 * math.sin(2 * math.pi * 0.15 * self._t + 0.5),
+                    "yaw":   45.0,
+                }
             data = self.bus.read_i2c_block_data(self.addr, 0x1A, 6)
             def to_signed(high, low):
                 val = (high << 8) | low
@@ -26,8 +38,6 @@ if config.IS_PI:
             return {"roll": roll, "pitch": pitch, "yaw": yaw}
 
 else:
-    import math, time
-
     class IMU:
         """Stub de simulation pour développement Mac."""
         def __init__(self):
@@ -35,8 +45,8 @@ else:
 
         def read(self) -> dict:
             self._t += 0.1
-            # Simule un roulis sinusoïdal de ±8° à 0.2 Hz (houle)
-            roll  = 8.0 * math.sin(2 * math.pi * 0.2 * self._t)
-            pitch = 3.0 * math.sin(2 * math.pi * 0.15 * self._t + 0.5)
-            yaw   = 45.0
-            return {"roll": roll, "pitch": pitch, "yaw": yaw}
+            return {
+                "roll":  8.0 * math.sin(2 * math.pi * 0.2 * self._t),
+                "pitch": 3.0 * math.sin(2 * math.pi * 0.15 * self._t + 0.5),
+                "yaw":   45.0,
+            }

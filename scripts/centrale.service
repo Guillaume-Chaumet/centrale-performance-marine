@@ -6,8 +6,8 @@ Wants=signalk.service
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/centrale
-ExecStart=/home/pi/centrale/venv/bin/python main.py --mode auto
+WorkingDirectory=/home/pi/voile
+ExecStart=/home/pi/voile/venv/bin/python main.py --mode log
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
