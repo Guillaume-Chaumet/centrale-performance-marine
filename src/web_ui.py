@@ -107,7 +107,7 @@ class WebUI:
     def start(self):
         threading.Thread(target=self._http, daemon=True, name="web-http").start()
         threading.Thread(target=self._ws, daemon=True, name="web-ws").start()
-        print(f"UI → http://10.10.10.1:{HTTP_PORT}  (dev : http://localhost:{HTTP_PORT})")
+        print(f"UI → http://localhost:{HTTP_PORT}  (Pi : http://10.10.10.1:{HTTP_PORT})")
 
     # ── HTTP ──────────────────────────────────────────────────────────────────
 
@@ -154,9 +154,7 @@ class WebUI:
             def log_message(self, *_):
                 pass
 
-        server = HTTPServer(("::", HTTP_PORT), Handler)
-        server.socket.setsockopt(41, 26, 0)  # IPV6_V6ONLY=0 → écoute aussi IPv4
-        server.serve_forever()
+        HTTPServer(("0.0.0.0", HTTP_PORT), Handler).serve_forever()
 
     # ── WebSocket ─────────────────────────────────────────────────────────────
 

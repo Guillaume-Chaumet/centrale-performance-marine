@@ -35,7 +35,7 @@ if config.IS_PI:
             yaw   = to_signed(data[1], data[0]) / 16.0
             roll  = to_signed(data[3], data[2]) / 16.0
             pitch = to_signed(data[5], data[4]) / 16.0
-            return {"roll": -roll, "pitch": -pitch, "yaw": yaw}
+            return {"roll": roll, "pitch": pitch, "yaw": yaw}
 
 else:
     class IMU:
