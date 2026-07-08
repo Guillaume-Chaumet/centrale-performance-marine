@@ -154,7 +154,9 @@ class WebUI:
             def log_message(self, *_):
                 pass
 
-        HTTPServer(("0.0.0.0", HTTP_PORT), Handler).serve_forever()
+        server = HTTPServer(("::", HTTP_PORT), Handler)
+        server.socket.setsockopt(41, 26, 0)  # IPV6_V6ONLY=0 → écoute aussi IPv4
+        server.serve_forever()
 
     # ── WebSocket ─────────────────────────────────────────────────────────────
 
@@ -162,7 +164,7 @@ class WebUI:
         asyncio.run(self._ws_serve())
 
     async def _ws_serve(self):
-        async with websockets.serve(self._ws_handler, "0.0.0.0", WS_PORT):
+        async with websockets.serve(self._ws_handler, "::", WS_PORT):
             await asyncio.Future()
 
     async def _ws_handler(self, ws):
