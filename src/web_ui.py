@@ -162,7 +162,7 @@ class WebUI:
         asyncio.run(self._ws_serve())
 
     async def _ws_serve(self):
-        async with websockets.serve(self._ws_handler, "::", WS_PORT):
+        async with websockets.serve(self._ws_handler, "0.0.0.0", WS_PORT):
             await asyncio.Future()
 
     async def _ws_handler(self, ws):
