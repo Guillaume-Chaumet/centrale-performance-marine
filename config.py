@@ -9,9 +9,9 @@ SIGNALK_HOST = os.getenv("SIGNALK_HOST", "localhost")
 SIGNALK_WS_PORT = int(os.getenv("SIGNALK_WS_PORT", "3000"))    # WebSocket API
 SIGNALK_NMEA_PORT = int(os.getenv("SIGNALK_NMEA_PORT", "10110"))  # TCP NMEA input (simulateur)
 
-# Port série MiniPlex → Pi (USB)
-MINIPLEX_PORT = os.getenv("MINIPLEX_PORT", "/dev/ttyACM0" if IS_PI else None)
-MINIPLEX_BAUD = 38400
+# Port série MiniPlex → Pi (USB) — symlink udev stable, port host à 460800
+MINIPLEX_PORT = os.getenv("MINIPLEX_PORT", "/dev/miniplex" if IS_PI else None)
+MINIPLEX_BAUD = int(os.getenv("MINIPLEX_BAUD", "460800"))
 
 # Port série Out1 → TP22 (via MiniPlex retour)
 TP22_PORT = os.getenv("TP22_PORT", "/dev/ttyUSB0" if IS_PI else None)

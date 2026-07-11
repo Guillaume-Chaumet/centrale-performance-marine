@@ -103,11 +103,7 @@ def main():
     ui_state = UIState(sail_config=sail_config)
     WebUI(ui_state).start()
 
-    # Auto-démarrage de l'enregistrement
-    logger.start(sail_config)
-    rec_started_at: float | None = time.time()
-    print(f"Enregistrement → {logger.path}")
-    ui_state.update(sail_config=sail_config, is_recording=True)
+    rec_started_at: float | None = None
 
     pressure_history: list[tuple[float, float]] = []  # (timestamp, hPa)
     last_pressure_sample = 0.0

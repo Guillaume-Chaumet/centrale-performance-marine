@@ -102,6 +102,7 @@ class SignalKClient:
         self._port = port or config.SIGNALK_WS_PORT
         self._data = InstrumentData()
         self._lock = threading.Lock()
+        self._self_context = "vessels.self"  # remplacé par l'URN réel au message d'accueil
         self._ais: dict[str, dict] = {}
         self._ais_lock = threading.Lock()
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -135,8 +136,12 @@ class SignalKClient:
                 await asyncio.sleep(3.0)
 
     def _parse(self, msg: dict):
-        context = msg.get("context", "vessels.self")
-        if context != "vessels.self" and context.startswith("vessels."):
+        # Message d'accueil Signal K : porte l'identité "self" (URN du bateau)
+        if "self" in msg and "updates" not in msg:
+            self._self_context = msg["self"]
+            return
+        context = msg.get("context", self._self_context)
+        if context not in (self._self_context, "vessels.self") and context.startswith("vessels."):
             mmsi = context.split(":")[-1] if ":" in context else context.split(".")[-1]
             self._parse_ais(mmsi, msg)
             return
