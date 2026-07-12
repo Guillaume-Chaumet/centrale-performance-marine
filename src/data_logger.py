@@ -84,7 +84,7 @@ def _fmt(val, decimals: int = 2) -> str:
 TELEMETRY_FIELDS = [
     "timestamp", "awa_deg", "aws_kts", "twa_deg", "tws_kts",
     "stw_kts", "sog_kts", "heel_deg", "vmg", "rendement",
-    "pressure_hpa", "temperature_c", "polar_rec",
+    "pressure_hpa", "temperature_c", "temperature_air", "polar_rec",
 ]
 
 
@@ -104,21 +104,23 @@ class TelemetryLogger:
     def write(self, data: InstrumentData, awa_filtered: float | None,
               vmg: float | None, rendement: float | None,
               roll: float | None, pressure_hpa: float | None,
-              temperature_c: float | None, polar_rec: bool):
+              temperature_c: float | None, polar_rec: bool,
+              temperature_air: float | None = None):
         self._writer.writerow({
-            "timestamp":     datetime.utcnow().isoformat(),
-            "awa_deg":       _fmt(awa_filtered),
-            "aws_kts":       _fmt(data.aws_kts),
-            "twa_deg":       _fmt(data.twa_deg),
-            "tws_kts":       _fmt(data.tws_kts),
-            "stw_kts":       _fmt(data.stw_kts),
-            "sog_kts":       _fmt(data.sog_kts),
-            "heel_deg":      _fmt(roll),
-            "vmg":           _fmt(vmg),
-            "rendement":     _fmt(rendement, 3),
-            "pressure_hpa":  _fmt(pressure_hpa, 1),
-            "temperature_c": _fmt(temperature_c, 1),
-            "polar_rec":     "1" if polar_rec else "0",
+            "timestamp":        datetime.utcnow().isoformat(),
+            "awa_deg":          _fmt(awa_filtered),
+            "aws_kts":          _fmt(data.aws_kts),
+            "twa_deg":          _fmt(data.twa_deg),
+            "tws_kts":          _fmt(data.tws_kts),
+            "stw_kts":          _fmt(data.stw_kts),
+            "sog_kts":          _fmt(data.sog_kts),
+            "heel_deg":         _fmt(roll),
+            "vmg":              _fmt(vmg),
+            "rendement":        _fmt(rendement, 3),
+            "pressure_hpa":     _fmt(pressure_hpa, 1),
+            "temperature_c":    _fmt(temperature_c, 1),
+            "temperature_air":  _fmt(temperature_air, 1),
+            "polar_rec":        "1" if polar_rec else "0",
         })
         self._file.flush()
 

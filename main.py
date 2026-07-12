@@ -167,10 +167,20 @@ def main():
             else:
                 awa_filtered = kalman.predict_only()
 
+        # ── Vent réel ─────────────────────────────────────────────────────────
+        # Signal K ne calcule pas le vent réel (pas de plugin dérivé). On le
+        # calcule depuis le vent apparent + la vitesse bateau : STW (loch) si
+        # dispo, sinon SOG (GPS). On respecte le vent réel s'il est déjà fourni.
+        boat_speed = data.stw_kts if data.stw_kts else data.sog_kts
+        if (data.twa_deg is None and data.tws_kts is None
+                and data.awa_deg is not None and data.aws_kts is not None
+                and boat_speed):
+            data.twa_deg, data.tws_kts = _true_wind(data.awa_deg, data.aws_kts, boat_speed)
+
         # ── VMG ───────────────────────────────────────────────────────────────
         vmg: float | None = None
-        if data.stw_kts and data.twa_deg:
-            vmg = round(data.stw_kts * math.cos(math.radians(data.twa_deg)), 2)
+        if boat_speed and data.twa_deg is not None:
+            vmg = round(boat_speed * math.cos(math.radians(data.twa_deg)), 2)
 
         # ── Rendement ─────────────────────────────────────────────────────────
         rendement: float | None = None
@@ -277,7 +287,7 @@ def main():
         if now_wall - last_telemetry_s >= 10.0:
             telemetry.write(data, awa_filtered, vmg, rendement, roll,
                             baro_data["pressure_hpa"], baro_data["temperature_c"],
-                            logger.is_active)
+                            logger.is_active, temperature_air=data.temp_air_deg)
             last_telemetry_s = now_wall
 
         # ── Hot-reload polaire (thread réentraînement écrit sur disque) ───────
@@ -303,6 +313,7 @@ def main():
             rendement=_r(rendement, 3),
             pressure_hpa=baro_data["pressure_hpa"],
             temperature_c=baro_data["temperature_c"],
+            temperature_air_c=_r(data.temp_air_deg, 1),
             pressure_trend=pressure_trend,
             gps_source=gps_source,
             is_recording=logger.is_active,
@@ -337,6 +348,15 @@ def main():
 
 def _r(val, decimals: int = 2):
     return round(val, decimals) if val is not None else None
+
+
+def _true_wind(awa_deg, aws_kts, boat_kts):
+    """Vent réel calculé par soustraction vectorielle de la vitesse bateau au
+    vent apparent. Retourne (twa_deg signé bâbord/tribord, tws_kts)."""
+    a = math.radians(abs(awa_deg))
+    tws = math.sqrt(aws_kts ** 2 + boat_kts ** 2 - 2 * aws_kts * boat_kts * math.cos(a))
+    twa = math.degrees(math.atan2(aws_kts * math.sin(a), aws_kts * math.cos(a) - boat_kts))
+    return round(math.copysign(twa, awa_deg), 1), round(tws, 2)
 
 
 def _bearing(own_lat, own_lon, tgt_lat, tgt_lon) -> float | None:

@@ -213,7 +213,8 @@ button { font-family: 'Archivo', sans-serif; }
 
   <!-- ── AIS ── -->
   <div id="t-ais" style="display:none;grid-template-columns:1fr 1.1fr;background:var(--bg)">
-    <div style="padding:22px;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--line)">
+    <div style="padding:14px 22px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border-right:1px solid var(--line)">
+      <button id="t-ais-zoom" onclick="cycleAisRange()" style="align-self:flex-end;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:5px 12px;cursor:pointer;font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.04em">⊕ Portée · Moyen</button>
       <svg viewBox="0 0 360 360" style="width:340px;height:340px">
         <circle cx="180" cy="180" r="168" style="fill:var(--panel);stroke:var(--line)" stroke-width="1"></circle>
         <circle cx="180" cy="180" r="126" fill="none" style="stroke:var(--polarline)" stroke-width="1"></circle>
@@ -223,7 +224,7 @@ button { font-family: 'Archivo', sans-serif; }
         <line x1="12" y1="180" x2="348" y2="180" style="stroke:var(--polarline)" stroke-width="1"></line>
         <text x="184" y="24" font-family="IBM Plex Mono" font-size="10" style="fill:var(--muted)">N</text>
         <polygon points="180,166 173,194 187,194" style="fill:var(--accent)"></polygon>
-        <text x="130" y="198" font-family="IBM Plex Mono" font-size="9" style="fill:var(--muted)">2 / 4 / 6 NM</text>
+        <text id="t-radarscale" x="180" y="210" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" style="fill:var(--muted)">2 / 4 / 6 NM</text>
         <g id="t-radarships"></g>
       </svg>
     </div>
@@ -252,7 +253,8 @@ button { font-family: 'Archivo', sans-serif; }
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">GÎTE · °</span><span id="hv-heel" style="font:700 28px 'Barlow Condensed',sans-serif;color:#c78f5a;font-variant-numeric:tabular-nums">—</span></div><div id="h-heel"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">RENDEMENT · %</span><span id="hv-rdt" style="font:700 28px 'Barlow Condensed',sans-serif;color:#b8a0e8;font-variant-numeric:tabular-nums">—</span></div><div id="h-rdt"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">BARO · hPa</span><span id="hv-pres" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e87850;font-variant-numeric:tabular-nums">—</span></div><div id="h-pres"></div></div>
-      <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">TEMP · °C</span><span id="hv-temp" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e85f5f;font-variant-numeric:tabular-nums">—</span></div><div id="h-temp"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">T BOÎTIER · °C</span><span id="hv-temp" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e85f5f;font-variant-numeric:tabular-nums">—</span></div><div id="h-temp"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">T EXT · °C</span><span id="hv-tempair" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e8975f;font-variant-numeric:tabular-nums">—</span></div><div id="h-tempair"></div></div>
     </div>
   </div>
 
@@ -330,9 +332,9 @@ button { font-family: 'Archivo', sans-serif; }
 
   <!-- AIS -->
   <div id="m-ais" style="display:none;padding:10px 0 6px">
-    <div style="display:flex;justify-content:space-between;padding:6px 18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 18px">
       <span id="m-aishdr" style="font:600 13px 'Archivo';color:var(--ink)">AIS</span>
-      <span style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted)">portée 6 NM</span>
+      <button id="m-ais-zoom" onclick="cycleAisRange()" style="background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer;font:600 11px 'IBM Plex Mono',monospace">⊕ 6 NM</button>
     </div>
     <div id="m-aislist"></div>
   </div>
@@ -353,7 +355,8 @@ button { font-family: 'Archivo', sans-serif; }
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">GÎTE · °</span><span id="mhv-heel" style="font:700 22px 'Barlow Condensed',sans-serif;color:#c78f5a;font-variant-numeric:tabular-nums">—</span></div><div id="mh-heel"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">RENDEMENT · %</span><span id="mhv-rdt" style="font:700 22px 'Barlow Condensed',sans-serif;color:#b8a0e8;font-variant-numeric:tabular-nums">—</span></div><div id="mh-rdt"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">BARO · hPa</span><span id="mhv-pres" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e87850;font-variant-numeric:tabular-nums">—</span></div><div id="mh-pres"></div></div>
-      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">TEMP · °C</span><span id="mhv-temp" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e85f5f;font-variant-numeric:tabular-nums">—</span></div><div id="mh-temp"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">T BOÎTIER · °C</span><span id="mhv-temp" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e85f5f;font-variant-numeric:tabular-nums">—</span></div><div id="mh-temp"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">T EXT · °C</span><span id="mhv-tempair" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e8975f;font-variant-numeric:tabular-nums">—</span></div><div id="mh-tempair"></div></div>
     </div>
   </div>
 
@@ -370,7 +373,14 @@ button { font-family: 'Archivo', sans-serif; }
 <script>
 const WS_URL = `ws://${location.hostname}:8081`;
 let ws = null, lastData = {};
-const S = { theme:'day', view:'instruments', sail:0, pilot:false, rec:false, menuOpen:false, windDismissed:false, depDismissed:false };
+const S = { theme:'day', view:'instruments', sail:0, pilot:false, rec:false, menuOpen:false, windDismissed:false, depDismissed:false, aisRange:1 };
+
+// portées radar AIS (3 niveaux) — anneaux à 1/3, 2/3, 3/3 de la portée max
+const AIS_RANGES = [
+  { max: 1.5, rings: '0.5 / 1 / 1.5 NM', name: 'Près'  },
+  { max: 6,   rings: '2 / 4 / 6 NM',     name: 'Moyen' },
+  { max: 18,  rings: '6 / 12 / 18 NM',   name: 'Loin'  },
+];
 
 const THEMES = {
   day: { '--bg':'#f4f1ea','--panel':'#ffffff','--line':'#e2dccd','--tile2':'#ece6d8',
@@ -576,13 +586,15 @@ function renderAIS(vessels) {
       <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.sog != null ? v.sog.toFixed(1) + ' kn' : '—'}</div></div></div>`;
   }).join('');
 
-  // radar blips
+  // radar blips — échelle selon la portée sélectionnée (126 px = portée max)
+  const maxR = AIS_RANGES[S.aisRange].max;
+  const ppnm = 126 / maxR;
   g('t-radarships').innerHTML = sorted.map(v => {
     if (v.bearing == null || v.distance == null) return '';
     const r = v.bearing * Math.PI / 180;
-    const d = Math.min(v.distance, 6);
-    const x = (180 + d * 21 * Math.sin(r)).toFixed(1);
-    const y = (180 - d * 21 * Math.cos(r)).toFixed(1);
+    const d = Math.min(v.distance, maxR);
+    const x = (180 + d * ppnm * Math.sin(r)).toFixed(1);
+    const y = (180 - d * ppnm * Math.cos(r)).toFixed(1);
     const fill = v.cpa != null && v.cpa < 0.5 ? '#e0322c' : '#1f8a5b';
     const rot = v.cog != null ? v.cog : 0;
     return `<g transform="translate(${x},${y})"><polygon points="0,-7 -5,7 5,7" fill="${fill}" transform="rotate(${rot})"></polygon></g>`;
@@ -591,6 +603,17 @@ function renderAIS(vessels) {
 function cpaColor(cpa) {
   if (cpa == null) return 'var(--muted)';
   return cpa < 0.5 ? '#e0322c' : cpa >= 1.0 ? 'var(--goodtext)' : 'var(--accent)';
+}
+function cycleAisRange() {
+  S.aisRange = (S.aisRange + 1) % AIS_RANGES.length;
+  updateAisRangeUI();
+  renderAIS(lastData.ais_vessels || []);
+}
+function updateAisRangeUI() {
+  const R = AIS_RANGES[S.aisRange];
+  const sc = g('t-radarscale'); if (sc) sc.textContent = R.rings;
+  const tb = g('t-ais-zoom');   if (tb) tb.textContent = '⊕ Portée · ' + R.name;
+  const mb = g('m-ais-zoom');   if (mb) mb.textContent = '⊕ ' + R.max + ' NM';
 }
 
 // ── Clock ──────────────────────────────────────────────────────────
@@ -684,8 +707,9 @@ const HIST_CHARTS = [
   { id:'vmg',  key:'vmg',            color:'#a078e8' },
   { id:'heel', key:'heel_deg',       color:'#c78f5a' },
   { id:'rdt',  key:'rendement',      color:'#b8a0e8', scale: v => v * 100 },
-  { id:'pres', key:'pressure_hpa',   color:'#e87850' },
-  { id:'temp', key:'temperature_c',  color:'#e85f5f' },
+  { id:'pres',    key:'pressure_hpa',    color:'#e87850' },
+  { id:'temp',    key:'temperature_c',   color:'#e85f5f' },
+  { id:'tempair', key:'temperature_air', color:'#e8975f' },
 ];
 
 function _fmtSession(s) {
@@ -769,6 +793,7 @@ function fmt(v, dec) { return v != null ? parseFloat(v).toFixed(dec) : '—'; }
 // ── Boot ───────────────────────────────────────────────────────────
 applyTheme();
 buildSailMenus();
+updateAisRangeUI();
 setView('instruments');
 connect();
 </script>
