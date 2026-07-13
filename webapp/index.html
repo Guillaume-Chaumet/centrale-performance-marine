@@ -107,6 +107,7 @@ button { font-family: 'Archivo', sans-serif; }
           </svg>
         </div>
         <div style="margin-top:10px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">FILTRE KALMAN 1D · BNO055 ROLL-CORR · 10 Hz</div>
+        <div id="t-headchip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">CAP —° · DÉRIVE —°</div>
       </div>
 
       <!-- AWS + mini grid -->
@@ -255,6 +256,8 @@ button { font-family: 'Archivo', sans-serif; }
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">BARO · hPa</span><span id="hv-pres" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e87850;font-variant-numeric:tabular-nums">—</span></div><div id="h-pres"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">T BOÎTIER · °C</span><span id="hv-temp" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e85f5f;font-variant-numeric:tabular-nums">—</span></div><div id="h-temp"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">T EXT · °C</span><span id="hv-tempair" style="font:700 28px 'Barlow Condensed',sans-serif;color:#e8975f;font-variant-numeric:tabular-nums">—</span></div><div id="h-tempair"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">CAP · °</span><span id="hv-hdg" style="font:700 28px 'Barlow Condensed',sans-serif;color:#8fb8c7;font-variant-numeric:tabular-nums">—</span></div><div id="h-hdg"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden"><div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.1em">DÉRIVE · °</span><span id="hv-drift" style="font:700 28px 'Barlow Condensed',sans-serif;color:#c78f9f;font-variant-numeric:tabular-nums">—</span></div><div id="h-drift"></div></div>
     </div>
   </div>
 
@@ -357,6 +360,8 @@ button { font-family: 'Archivo', sans-serif; }
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">BARO · hPa</span><span id="mhv-pres" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e87850;font-variant-numeric:tabular-nums">—</span></div><div id="mh-pres"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">T BOÎTIER · °C</span><span id="mhv-temp" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e85f5f;font-variant-numeric:tabular-nums">—</span></div><div id="mh-temp"></div></div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">T EXT · °C</span><span id="mhv-tempair" style="font:700 22px 'Barlow Condensed',sans-serif;color:#e8975f;font-variant-numeric:tabular-nums">—</span></div><div id="mh-tempair"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">CAP · °</span><span id="mhv-hdg" style="font:700 22px 'Barlow Condensed',sans-serif;color:#8fb8c7;font-variant-numeric:tabular-nums">—</span></div><div id="mh-hdg"></div></div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden"><div style="padding:8px 12px 3px;display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--label)">DÉRIVE · °</span><span id="mhv-drift" style="font:700 22px 'Barlow Condensed',sans-serif;color:#c78f9f;font-variant-numeric:tabular-nums">—</span></div><div id="mh-drift"></div></div>
     </div>
   </div>
 
@@ -654,6 +659,12 @@ function applyData(d) {
   set('t-heel', fmt(d.heel, 1));
   set('t-vmg', fmt(d.vmg, 1)); set('m-vmg', fmt(d.vmg, 1));
 
+  if (g('t-headchip')) {
+    const h  = d.heading != null ? Math.round(d.heading) + '°' : '—°';
+    const dr = d.drift != null ? (d.drift >= 0 ? '+' : '') + d.drift.toFixed(0) + '°' : '—°';
+    g('t-headchip').textContent = `CAP ${h} · DÉRIVE ${dr}`;
+  }
+
   const rdt = d.rendement != null ? Math.round(d.rendement * 100) : null;
   set('t-rdt', rdt != null ? String(rdt) : '—');
   if (g('t-rdtbar')) g('t-rdtbar').style.width = (rdt ?? 0) + '%';
@@ -710,6 +721,8 @@ const HIST_CHARTS = [
   { id:'pres',    key:'pressure_hpa',    color:'#e87850' },
   { id:'temp',    key:'temperature_c',   color:'#e85f5f' },
   { id:'tempair', key:'temperature_air', color:'#e8975f' },
+  { id:'hdg',     key:'heading_deg',     color:'#8fb8c7' },
+  { id:'drift',   key:'drift_deg',       color:'#c78f9f' },
 ];
 
 function _fmtSession(s) {

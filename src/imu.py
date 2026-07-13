@@ -27,6 +27,7 @@ if config.IS_PI:
                     "roll":  8.0 * math.sin(2 * math.pi * 0.2 * self._t),
                     "pitch": 3.0 * math.sin(2 * math.pi * 0.15 * self._t + 0.5),
                     "yaw":   45.0,
+                    "mag_calib": 3,
                 }
             data = self.bus.read_i2c_block_data(self.addr, 0x1A, 6)
             def to_signed(high, low):
@@ -35,7 +36,11 @@ if config.IS_PI:
             yaw   = to_signed(data[1], data[0]) / 16.0
             roll  = to_signed(data[3], data[2]) / 16.0
             pitch = to_signed(data[5], data[4]) / 16.0
-            return {"roll": roll, "pitch": pitch, "yaw": yaw}
+            try:
+                mag_calib = self.bus.read_byte_data(self.addr, 0x35) & 0x03  # CALIB_STAT, bits magnéto
+            except OSError:
+                mag_calib = 0
+            return {"roll": roll, "pitch": pitch, "yaw": yaw, "mag_calib": mag_calib}
 
 else:
     class IMU:

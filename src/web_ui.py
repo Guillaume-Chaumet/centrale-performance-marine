@@ -70,6 +70,8 @@ class UIState:
             "pressure_hpa": None,
             "temperature_c": None,
             "temperature_air_c": None,
+            "heading": None,
+            "drift": None,
             "pressure_trend": None,
             "gps_source": "signalk",
             "sail_config": sail_config,

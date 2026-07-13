@@ -11,6 +11,7 @@ import time
 import config
 from src.signalk_client import SignalKClient
 from src.true_wind import vent_reel_bateau
+from src.heading import cap_vrai
 from src.imu import IMU
 from src.kalman_wind import KalmanWind
 from src.data_logger import DataLogger, TelemetryLogger
@@ -168,25 +169,40 @@ def main():
             else:
                 awa_filtered = kalman.predict_only()
 
-        # ── Vent réel (angle TWA + vitesse TWS) ───────────────────────────────
-        # Calcul au GPS (src/true_wind.vent_reel_bateau) : vent apparent +
-        # route/vitesse FOND. Utilise le cap vrai (compas) s'il est présent pour
-        # corriger la dérive ; sinon retombe sur Cv = COG → "vent vrai" à la
-        # ScanNav, sans correction de dérive (cf Parodi éq. 30-31). Sans loch, la
-        # vitesse fond (SOG) sert de vitesse bateau. On respecte le vent réel
-        # déjà fourni par Signal K (MWV,T).
+        # ── Cap vrai (Cv) : priorité IMU BNO055 → Signal K → COG ──────────────
+        # Coque bois + mât alu + hors-bord éloigné : déviation négligeable, donc
+        # cap magnétique IMU + déclinaison (src/heading.cap_vrai). On ne s'y fie
+        # que si la magnéto du BNO055 est calibrée (mag_calib == 3).
+        cv = None
+        cv_is_heading = False
+        if imu_data.get("mag_calib", 0) >= 3:
+            cv = cap_vrai(imu_data.get("yaw"))
+            cv_is_heading = cv is not None
+        if cv is None and data.hdg_true_deg is not None:
+            cv, cv_is_heading = data.hdg_true_deg, True
+        if cv is None and data.hdg_mag_deg is not None and data.mag_var_deg is not None:
+            cv, cv_is_heading = (data.hdg_mag_deg + data.mag_var_deg) % 360.0, True
+        if cv is None:
+            cv = data.cog_deg  # dernier recours : route fond (dérive non corrigée)
+
+        # Dérive δ = COG − cap (seulement avec un vrai cap et en route)
+        heading_deg = cv if cv_is_heading else None
+        drift_deg = None
+        if cv_is_heading and data.cog_deg is not None and data.sog_kts and data.sog_kts > 0.5:
+            drift_deg = ((data.cog_deg - cv + 180.0) % 360.0) - 180.0
+
+        # ── Vent réel (angle TWA + vitesse TWS) — cf src/true_wind.py ─────────
+        # Vent apparent + route/vitesse FOND. Avec un vrai cap (IMU) la dérive
+        # est corrigée ; sinon Cv=COG → "vent vrai" sans correction (Parodi
+        # éq. 30-31). Sans loch, la SOG sert de vitesse bateau. On respecte le
+        # vent réel déjà fourni par Signal K (MWV,T).
         if (data.twa_deg is None and data.tws_kts is None
-                and data.awa_deg is not None and data.aws_kts is not None):
-            cv = data.hdg_true_deg
-            if cv is None and data.hdg_mag_deg is not None and data.mag_var_deg is not None:
-                cv = (data.hdg_mag_deg + data.mag_var_deg) % 360.0
-            if cv is None:
-                cv = data.cog_deg  # fallback : route fond (ignore la dérive)
-            if cv is not None and data.sog_kts is not None:
-                res = vent_reel_bateau(cv, data.awa_deg % 360.0, data.aws_kts,
-                                       data.cog_deg, data.sog_kts)
-                if res is not None:
-                    data.twa_deg, data.tws_kts = res
+                and data.awa_deg is not None and data.aws_kts is not None
+                and cv is not None and data.sog_kts is not None):
+            res = vent_reel_bateau(cv, data.awa_deg % 360.0, data.aws_kts,
+                                   data.cog_deg, data.sog_kts)
+            if res is not None:
+                data.twa_deg, data.tws_kts = res
 
         # ── VMG ───────────────────────────────────────────────────────────────
         vmg: float | None = None
@@ -299,7 +315,8 @@ def main():
         if now_wall - last_telemetry_s >= 10.0:
             telemetry.write(data, awa_filtered, vmg, rendement, roll,
                             baro_data["pressure_hpa"], baro_data["temperature_c"],
-                            logger.is_active, temperature_air=data.temp_air_deg)
+                            logger.is_active, temperature_air=data.temp_air_deg,
+                            heading=heading_deg, drift=drift_deg)
             last_telemetry_s = now_wall
 
         # ── Hot-reload polaire (thread réentraînement écrit sur disque) ───────
@@ -326,6 +343,8 @@ def main():
             pressure_hpa=baro_data["pressure_hpa"],
             temperature_c=baro_data["temperature_c"],
             temperature_air_c=_r(data.temp_air_deg, 1),
+            heading=_r(heading_deg, 0),
+            drift=_r(drift_deg, 1),
             pressure_trend=pressure_trend,
             gps_source=gps_source,
             is_recording=logger.is_active,

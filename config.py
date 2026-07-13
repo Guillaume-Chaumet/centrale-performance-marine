@@ -21,6 +21,10 @@ TP22_BAUD = 4800
 IMU_I2C_ADDRESS = 0x28
 IMU_SAMPLE_RATE_HZ = 10
 
+# Cap magnétique IMU → cap vrai (pour le vent réel)
+MAGNETIC_DECLINATION_DEG = float(os.getenv("MAGNETIC_DECLINATION_DEG", "3.0"))  # ~+3°E Marseille 2026
+HEADING_OFFSET_DEG = float(os.getenv("HEADING_OFFSET_DEG", "0.0"))  # offset montage/résiduel, réglé au cross-check COG
+
 # Baromètre BMP280 (I2C) — SDO→GND = 0x76, SDO→VCC = 0x77
 BARO_I2C_ADDRESS = int(os.getenv("BARO_I2C_ADDRESS", "0x76"), 16)
 
