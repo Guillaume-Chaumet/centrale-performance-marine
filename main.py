@@ -169,9 +169,12 @@ def main():
                 awa_filtered = kalman.predict_only()
 
         # ── Vent réel (angle TWA + vitesse TWS) ───────────────────────────────
-        # Calcul rigoureux au GPS (src/true_wind.vent_reel_bateau) : cap vrai +
-        # route/vitesse FOND + vent apparent. Indépendant du loch, du courant et
-        # de la dérive. On respecte le vent réel s'il est déjà fourni (MWV,T).
+        # Calcul au GPS (src/true_wind.vent_reel_bateau) : vent apparent +
+        # route/vitesse FOND. Utilise le cap vrai (compas) s'il est présent pour
+        # corriger la dérive ; sinon retombe sur Cv = COG → "vent vrai" à la
+        # ScanNav, sans correction de dérive (cf Parodi éq. 30-31). Sans loch, la
+        # vitesse fond (SOG) sert de vitesse bateau. On respecte le vent réel
+        # déjà fourni par Signal K (MWV,T).
         if (data.twa_deg is None and data.tws_kts is None
                 and data.awa_deg is not None and data.aws_kts is not None):
             cv = data.hdg_true_deg
