@@ -36,6 +36,9 @@ class InstrumentData:
     heel_deg: Optional[float] = None  # Gîte (degrés, positif = tribord)
     pitch_deg: Optional[float] = None
     temp_air_deg: Optional[float] = None  # Température air extérieur (anémo, °C)
+    hdg_true_deg: Optional[float] = None  # Cap vrai (HDT)
+    hdg_mag_deg: Optional[float] = None   # Cap magnétique (HDG/HDM)
+    mag_var_deg: Optional[float] = None   # Déclinaison magnétique (Est positif)
     lat: Optional[float] = None
     lon: Optional[float] = None
     updated_at: float = 0.0           # time.monotonic() du dernier update reçu
@@ -58,6 +61,9 @@ _PATHS = {
     "navigation.attitude.roll":        ("heel_deg",     lambda v: v * RAD2DEG),
     "navigation.attitude.pitch":       ("pitch_deg",    lambda v: v * RAD2DEG),
     "environment.outside.temperature": ("temp_air_deg", lambda v: v - _K2C),
+    "navigation.headingTrue":          ("hdg_true_deg", lambda v: v * RAD2DEG),
+    "navigation.headingMagnetic":      ("hdg_mag_deg",  lambda v: v * RAD2DEG),
+    "navigation.magneticVariation":    ("mag_var_deg",  lambda v: v * RAD2DEG),
 }
 
 _SUBSCRIBE = {

@@ -10,6 +10,7 @@ import time
 
 import config
 from src.signalk_client import SignalKClient
+from src.true_wind import vent_reel_bateau
 from src.imu import IMU
 from src.kalman_wind import KalmanWind
 from src.data_logger import DataLogger, TelemetryLogger
@@ -167,18 +168,26 @@ def main():
             else:
                 awa_filtered = kalman.predict_only()
 
-        # ── Vent réel ─────────────────────────────────────────────────────────
-        # Signal K ne calcule pas le vent réel (pas de plugin dérivé). On le
-        # calcule depuis le vent apparent + la vitesse bateau : STW (loch) si
-        # dispo, sinon SOG (GPS). On respecte le vent réel s'il est déjà fourni.
-        boat_speed = data.stw_kts if data.stw_kts else data.sog_kts
+        # ── Vent réel (angle TWA + vitesse TWS) ───────────────────────────────
+        # Calcul rigoureux au GPS (src/true_wind.vent_reel_bateau) : cap vrai +
+        # route/vitesse FOND + vent apparent. Indépendant du loch, du courant et
+        # de la dérive. On respecte le vent réel s'il est déjà fourni (MWV,T).
         if (data.twa_deg is None and data.tws_kts is None
-                and data.awa_deg is not None and data.aws_kts is not None
-                and boat_speed):
-            data.twa_deg, data.tws_kts = _true_wind(data.awa_deg, data.aws_kts, boat_speed)
+                and data.awa_deg is not None and data.aws_kts is not None):
+            cv = data.hdg_true_deg
+            if cv is None and data.hdg_mag_deg is not None and data.mag_var_deg is not None:
+                cv = (data.hdg_mag_deg + data.mag_var_deg) % 360.0
+            if cv is None:
+                cv = data.cog_deg  # fallback : route fond (ignore la dérive)
+            if cv is not None and data.sog_kts is not None:
+                res = vent_reel_bateau(cv, data.awa_deg % 360.0, data.aws_kts,
+                                       data.cog_deg, data.sog_kts)
+                if res is not None:
+                    data.twa_deg, data.tws_kts = res
 
         # ── VMG ───────────────────────────────────────────────────────────────
         vmg: float | None = None
+        boat_speed = data.stw_kts if data.stw_kts else data.sog_kts
         if boat_speed and data.twa_deg is not None:
             vmg = round(boat_speed * math.cos(math.radians(data.twa_deg)), 2)
 
@@ -348,15 +357,6 @@ def main():
 
 def _r(val, decimals: int = 2):
     return round(val, decimals) if val is not None else None
-
-
-def _true_wind(awa_deg, aws_kts, boat_kts):
-    """Vent réel calculé par soustraction vectorielle de la vitesse bateau au
-    vent apparent. Retourne (twa_deg signé bâbord/tribord, tws_kts)."""
-    a = math.radians(abs(awa_deg))
-    tws = math.sqrt(aws_kts ** 2 + boat_kts ** 2 - 2 * aws_kts * boat_kts * math.cos(a))
-    twa = math.degrees(math.atan2(aws_kts * math.sin(a), aws_kts * math.cos(a) - boat_kts))
-    return round(math.copysign(twa, awa_deg), 1), round(tws, 2)
 
 
 def _bearing(own_lat, own_lon, tgt_lat, tgt_lon) -> float | None:

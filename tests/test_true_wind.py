@@ -8,7 +8,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.true_wind import vent_reel
+from src.true_wind import vent_reel, vent_reel_bateau
 
 
 def _close(a, b, tol=0.15):
@@ -56,6 +56,36 @@ def test_direction_from_pas_toward():
     # Vérifie qu'on retourne bien la direction D'OÙ vient le vent (pas vers où).
     Vwf, Dwf = vent_reel(Cv=180, Gwa=0, Vwa=10, Rf=180, Vf=0)
     assert _close(Dwf, 180.0)               # cap sud, vent de face → vient du sud
+
+
+# ── vent_reel_bateau : angle (TWA) + vitesse (TWS) relatifs au bateau ─────
+def test_bateau_immobile_twa_egale_apparent():
+    # À l'arrêt, TWA = Gwa (apparent) et TWS = Vwa.
+    twa, tws = vent_reel_bateau(Cv=40, Gwa=30, Vwa=9, Rf=None, Vf=0)
+    assert _close(twa, 30.0)
+    assert _close(tws, 9.0)
+
+
+def test_bateau_twa_tribord_positif():
+    # Apparent au travers tribord (Gwa=90) en marche → TWA positif, plus aft.
+    twa, tws = vent_reel_bateau(Cv=0, Gwa=90, Vwa=12, Rf=0, Vf=6)
+    assert twa > 90                         # vent réel plus en arrière que l'apparent
+    assert _close(tws, math.hypot(12, 6))
+
+
+def test_bateau_twa_babord_negatif():
+    # Apparent bâbord (Gwa=270 = -90) → TWA négatif (symétrique).
+    twa, tws = vent_reel_bateau(Cv=0, Gwa=270, Vwa=12, Rf=0, Vf=6)
+    assert twa < -90
+    assert _close(tws, math.hypot(12, 6))
+
+
+def test_bateau_indep_du_cap():
+    # TWA/TWS relatifs au bateau : identiques quel que soit le cap absolu
+    # (même géométrie bateau/route/vent tournée en bloc).
+    a = vent_reel_bateau(Cv=0,   Gwa=45, Vwa=10, Rf=0,   Vf=5)
+    b = vent_reel_bateau(Cv=120, Gwa=45, Vwa=10, Rf=120, Vf=5)
+    assert _close(a[0], b[0], 0.2) and _close(a[1], b[1], 0.2)
 
 
 # ── Valeurs manquantes / invalides ───────────────────────────────────────

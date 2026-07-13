@@ -71,3 +71,22 @@ def vent_reel(Cv, Gwa, Vwa, Rf, Vf) -> Optional[Tuple[float, float]]:
     Vwf = math.hypot(wf_x, wf_y)
     Dwf = (math.degrees(math.atan2(wf_x, wf_y)) + 180.0) % 360.0
     return round(Vwf, 2), round(Dwf, 1)
+
+
+def vent_reel_bateau(Cv, Gwa, Vwa, Rf, Vf) -> Optional[Tuple[float, float]]:
+    """Vent réel exprimé RELATIVEMENT AU BATEAU, dérivé de vent_reel().
+
+    Retourne (TWA, TWS) :
+      - TWA : angle du vent réel par rapport à l'étrave, signé
+              (-180..180, tribord positif / bâbord négatif)
+      - TWS : vitesse du vent réel /fond/ (= Vwf)
+    C'est l'angle/vitesse "instrument" (polaires, VMG, pilote), mais calculé
+    rigoureusement au GPS via vent_reel() plutôt qu'à partir du loch.
+    Retourne None si vent_reel() ne peut pas calculer.
+    """
+    res = vent_reel(Cv, Gwa, Vwa, Rf, Vf)
+    if res is None:
+        return None
+    Vwf, Dwf = res
+    twa = ((Dwf - Cv + 180.0) % 360.0) - 180.0   # direction vraie - cap, signé
+    return round(twa, 1), round(Vwf, 2)
