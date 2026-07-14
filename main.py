@@ -110,9 +110,9 @@ def main():
     pressure_history: list[tuple[float, float]] = []  # (timestamp, hPa)
     last_pressure_sample = 0.0
 
-    autopilot = Autopilot()
+    autopilot = Autopilot(enabled=(args.mode == "auto"))
     autopilot_active = False
-    status = "connecté" if autopilot.connected else "port absent — commandes simulées"
+    status = "connecté" if autopilot.connected else "port absent - commandes simulées"
     print(f"Autopilot TP22 : {status}")
 
     polar_status = "ML entraînée" if polar.is_trained else "générique"

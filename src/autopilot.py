@@ -11,14 +11,17 @@ MIN_SEND_INTERVAL = 0.5    # pas la peine d'envoyer plus vite que 2 Hz
 class Autopilot:
     """Envoie des phrases MWV au TP22 via port série (MiniPlex Override Out1)."""
 
-    def __init__(self):
+    def __init__(self, enabled: bool = False):
+        # enabled=False (modes log/coach) : ne jamais ouvrir le port série.
+        # TP22_PORT partage l'FTDI du MiniPlex que Signal K lit à 460800 ;
+        # l'ouvrir à TP22_BAUD (4800) reconfigurerait le port et couperait Signal K.
         self._serial = None
-        if config.TP22_PORT:
+        if enabled and config.TP22_PORT:
             import serial
             try:
                 self._serial = serial.Serial(config.TP22_PORT, config.TP22_BAUD, timeout=1)
-            except serial.SerialException as e:
-                print(f"[Autopilot] Port TP22 absent ({config.TP22_PORT}) — mode simulation")
+            except serial.SerialException:
+                print(f"[Autopilot] Port TP22 absent ({config.TP22_PORT}) - mode simulation")
         self._current_awa: float | None = None
         self._last_sent: float = 0.0
 
