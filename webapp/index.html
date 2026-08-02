@@ -194,7 +194,7 @@ button { font-family: var(--font-ui); color: inherit; }
       <span id="t-dot" class="dot" style="background:var(--danger)"></span>
       <span style="font:600 13px var(--font-mono);color:var(--ink-dim);letter-spacing:.08em">SIGNAL K · BORD</span>
       <span id="t-sail-top" class="chip" style="color:var(--accent)">GV + GENOIS</span>
-      <span id="t-gpshealth" class="chip" title="Satellites · HDOP">GPS -- · HDOP --</span>
+      <span id="t-gpshealth" class="chip" title="Satellites · HDOP · Qualité du fix">GPS -- · HDOP --</span>
     </div>
     <div class="topbar-side" style="font:600 12px var(--font-mono);color:var(--ink-dim)">
       <span style="display:flex;align-items:center;gap:6px">
@@ -736,14 +736,18 @@ function hdopColor(h) {
 function renderGpsHealth(d) {
   const sats = d.gps_sats != null ? d.gps_sats : '--';
   const hdop = d.gps_hdop != null ? d.gps_hdop.toFixed(1) : '--';
+  const q = d.gps_quality;
+  const qOk = q != null && /fix|dgps|rtk/i.test(q) && !/no|none|invalid/i.test(q);
+  const qTxt = q != null ? ` · <span style="color:${qOk ? 'var(--stbd)' : 'var(--danger)'}">${q}</span>` : '';
   const el = g('t-gpshealth');
   if (el) {
-    el.innerHTML = `GPS ${sats} · HDOP <span style="color:${hdopColor(d.gps_hdop)}">${hdop}</span>`;
+    el.innerHTML = `GPS ${sats} · HDOP <span style="color:${hdopColor(d.gps_hdop)}">${hdop}</span>${qTxt}`;
     el.style.borderColor = d.gps_hdop != null && d.gps_hdop > 5 ? 'var(--danger)' : 'var(--line)';
   }
   const m = g('m-gpshealth');
   if (m) {
-    m.innerHTML = `GPS ${sats}·<span style="color:${hdopColor(d.gps_hdop)}">${hdop}</span>`;
+    const md = q != null ? `<span style="color:${qOk ? 'var(--stbd)' : 'var(--danger)'}">●</span>` : '';
+    m.innerHTML = `GPS ${sats}·<span style="color:${hdopColor(d.gps_hdop)}">${hdop}</span>${md}`;
   }
 }
 
