@@ -152,8 +152,10 @@ class WebUI:
                     except Exception:
                         self.send_error(500)
                 else:
+                    # /v2 : nouvelle UI (design course au large) en relecture avant bascule
+                    page = _HTML.parent / "index_v2.html" if self.path.startswith("/v2") else html_path
                     try:
-                        body = html_path.read_bytes()
+                        body = page.read_bytes()
                         self.send_response(200)
                         self.send_header("Content-Type", "text/html; charset=utf-8")
                         self.end_headers()
