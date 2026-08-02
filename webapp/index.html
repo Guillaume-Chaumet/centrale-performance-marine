@@ -107,7 +107,8 @@ button { font-family: 'Archivo', sans-serif; }
           </svg>
         </div>
         <div style="margin-top:10px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">FILTRE KALMAN 1D · BNO055 ROLL-CORR · 10 Hz</div>
-        <div id="t-headchip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">CAP —° · DÉRIVE —°</div>
+        <div id="t-headchip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">COG —° · CAP —° · DÉRIVE —°</div>
+        <div id="t-barochip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">— hPa · T.ext —° · T.boît —°</div>
       </div>
 
       <!-- AWS + mini grid -->
@@ -129,8 +130,8 @@ button { font-family: 'Archivo', sans-serif; }
             <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-tws">—</span><span style="font-size:20px;color:var(--accent)">kn</span></div>
           </div>
           <div style="background:var(--panel);padding:12px 14px">
-            <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">STW</div>
-            <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-stw">—</span><span style="font-size:20px;color:var(--accent)">kn</span></div>
+            <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">SOG · FOND</div>
+            <div style="font:700 42px 'Barlow Condensed',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums"><span id="t-sog">—</span><span style="font-size:20px;color:var(--accent)">kn</span></div>
           </div>
           <div style="background:var(--panel);padding:12px 14px">
             <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.1em">GÎTE · IMU</div>
@@ -303,8 +304,8 @@ button { font-family: 'Archivo', sans-serif; }
         <div style="font:700 38px 'Barlow Condensed';color:var(--ink);font-variant-numeric:tabular-nums"><span id="m-aws">—</span><span style="font-size:13px;color:var(--accent)"> kn</span></div>
       </div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 13px">
-        <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">STW</div>
-        <div style="font:700 38px 'Barlow Condensed';color:var(--ink);font-variant-numeric:tabular-nums"><span id="m-stw">—</span><span style="font-size:13px;color:var(--accent)"> kn</span></div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">SOG / COG</div>
+        <div style="font:700 38px 'Barlow Condensed';color:var(--ink);font-variant-numeric:tabular-nums"><span id="m-sog">—</span><span style="font-size:13px;color:var(--accent)"> kn</span><span id="m-cog" style="font-size:15px;color:var(--accent)"> —°</span></div>
       </div>
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 13px">
         <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">TWA / TWS</div>
@@ -655,14 +656,22 @@ function applyData(d) {
   set('t-twa', fmt(d.twa, 0)); set('m-twa', fmt(d.twa, 0));
   set('t-tws', fmt(d.tws, 1));
   set('m-twssm', d.tws != null ? ' ' + d.tws.toFixed(1) : ' —');
-  set('t-stw', fmt(d.stw, 1)); set('m-stw', fmt(d.stw, 1));
+  set('t-sog', fmt(d.sog, 1)); set('m-sog', fmt(d.sog, 1));
+  if (g('m-cog')) g('m-cog').textContent = d.cog != null ? ' ' + Math.round(d.cog) + '°' : ' —°';
   set('t-heel', fmt(d.heel, 1));
   set('t-vmg', fmt(d.vmg, 1)); set('m-vmg', fmt(d.vmg, 1));
 
   if (g('t-headchip')) {
+    const cog = d.cog != null ? Math.round(d.cog) + '°' : '—°';
     const h  = d.heading != null ? Math.round(d.heading) + '°' : '—°';
     const dr = d.drift != null ? (d.drift >= 0 ? '+' : '') + d.drift.toFixed(0) + '°' : '—°';
-    g('t-headchip').textContent = `CAP ${h} · DÉRIVE ${dr}`;
+    g('t-headchip').textContent = `COG ${cog} · CAP ${h} · DÉRIVE ${dr}`;
+  }
+  if (g('t-barochip')) {
+    const p  = d.pressure_hpa != null ? d.pressure_hpa.toFixed(0) + ' hPa' : '— hPa';
+    const te = d.temperature_air_c != null ? d.temperature_air_c.toFixed(1) + '°' : '—°';
+    const tb = d.temperature_c != null ? d.temperature_c.toFixed(1) + '°' : '—°';
+    g('t-barochip').textContent = `${p} · T.ext ${te} · T.boît ${tb}`;
   }
 
   const rdt = d.rendement != null ? Math.round(d.rendement * 100) : null;
@@ -670,15 +679,17 @@ function applyData(d) {
   if (g('t-rdtbar')) g('t-rdtbar').style.width = (rdt ?? 0) + '%';
   set('m-rdtsm', rdt != null ? ` ${rdt}%` : ' —');
 
-  // polar dot — position courante (TWA × STW) + cible polaire
-  if (d.twa != null && d.stw != null) {
+  // polar dot — position courante (TWA × vitesse bateau) + cible polaire
+  // pas de loch sur ce bateau : on utilise le SOG comme vitesse bateau (repli STW)
+  const boatSpeed = d.sog != null ? d.sog : d.stw;
+  if (d.twa != null && boatSpeed != null) {
     const a = Math.abs(d.twa) * Math.PI / 180;
-    const r = Math.min(Math.abs(d.stw) / 9, 1.0) * 62;
+    const r = Math.min(Math.abs(boatSpeed) / 9, 1.0) * 62;
     const dot = g('t-polardot');
     if (dot) { dot.setAttribute('cx', (75 + r * Math.sin(a)).toFixed(1)); dot.setAttribute('cy', (75 - r * Math.cos(a)).toFixed(1)); }
     const tgt = g('t-polardot-target');
     if (tgt && d.rendement != null && d.rendement > 0) {
-      const rT = Math.min((d.stw / d.rendement) / 9, 1.0) * 62;
+      const rT = Math.min((boatSpeed / d.rendement) / 9, 1.0) * 62;
       tgt.setAttribute('cx', (75 + rT * Math.sin(a)).toFixed(1));
       tgt.setAttribute('cy', (75 - rT * Math.cos(a)).toFixed(1));
       tgt.setAttribute('opacity', '0.65');

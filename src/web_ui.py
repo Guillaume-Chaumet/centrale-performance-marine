@@ -64,6 +64,8 @@ class UIState:
             "twa": None,
             "tws": None,
             "stw": None,
+            "sog": None,
+            "cog": None,
             "heel": None,
             "vmg": None,
             "rendement": None,

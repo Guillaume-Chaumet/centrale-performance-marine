@@ -337,6 +337,8 @@ def main():
             twa=_r(data.twa_deg),
             tws=_r(data.tws_kts),
             stw=_r(data.stw_kts),
+            sog=_r(data.sog_kts, 1),
+            cog=_r(data.cog_deg, 0),
             heel=_r(roll),
             vmg=vmg,
             rendement=_r(rendement, 3),
