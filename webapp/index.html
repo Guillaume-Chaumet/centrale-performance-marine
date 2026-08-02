@@ -772,17 +772,26 @@ function setConn(ok) {
 }
 
 // ── Wind shift tactical ────────────────────────────────────────────
-// wind_shift signe : positif = tribord (adonnante/lift), negatif = babord (refus/header)
+// wind_shift : signe = sens de rotation géographique du vent (+ = horaire/adonne à droite).
+// Adonnante/refus dépend de l'amure : déduite du signe de l'AWA (tribord positif).
 function renderShift(d) {
   const twd = d.twd != null ? Math.round(d.twd) + '°' : '-°';
   const sh = d.wind_shift;
   let arrow = '-', col = 'var(--muted)', valTxt = '-', lbl = `TWD ${twd}`;
   if (sh != null) {
-    const mag = Math.abs(sh).toFixed(0);
-    valTxt = mag;
-    if (sh > 1)      { arrow = '↻'; col = 'var(--stbd)'; lbl = `Adonnante · TWD ${twd}`; }
-    else if (sh < -1){ arrow = '↺'; col = 'var(--port)'; lbl = `Refus · TWD ${twd}`; }
-    else             { arrow = '='; col = 'var(--muted)'; lbl = `Stable · TWD ${twd}`; }
+    valTxt = Math.abs(sh).toFixed(0);
+    const awa = d.awa_filtered != null ? d.awa_filtered : d.awa;
+    if (Math.abs(sh) <= 1) {
+      arrow = '='; col = 'var(--muted)'; lbl = `Stable · TWD ${twd}`;
+    } else if (awa == null) {
+      arrow = sh > 0 ? '↻' : '↺'; col = 'var(--muted)';
+      lbl = `Bascule ${sh > 0 ? 'droite' : 'gauche'} · TWD ${twd}`;
+    } else {
+      arrow = sh > 0 ? '↻' : '↺';
+      const lift = (sh > 0) === (awa > 0);  // bascule dans le sens du bord = adonnante
+      col = lift ? 'var(--stbd)' : 'var(--port)';
+      lbl = `${lift ? 'Adonnante' : 'Refus'} · TWD ${twd}`;
+    }
   }
   const sgn = sh != null && sh > 0 ? '+' : (sh != null && sh < 0 ? '-' : '');
   if (g('t-shift-arrow')) { g('t-shift-arrow').textContent = arrow; g('t-shift-arrow').style.color = col; }
