@@ -41,6 +41,10 @@ class InstrumentData:
     mag_var_deg: Optional[float] = None   # Déclinaison magnétique (Est positif)
     lat: Optional[float] = None
     lon: Optional[float] = None
+    gps_sats: Optional[int] = None        # nombre de satellites vus
+    gps_hdop: Optional[float] = None      # dilution horizontale (précision du fix)
+    gps_quality: Optional[str] = None     # qualité du fix (GNSS Fix, DGPS...)
+    gps_datetime: Optional[str] = None    # heure GPS ISO 8601 (UTC)
     updated_at: float = 0.0           # time.monotonic() du dernier update reçu
 
     def is_fresh(self, max_age_s: float = DATA_MAX_AGE_S) -> bool:
@@ -64,6 +68,10 @@ _PATHS = {
     "navigation.headingTrue":          ("hdg_true_deg", lambda v: v * RAD2DEG),
     "navigation.headingMagnetic":      ("hdg_mag_deg",  lambda v: v * RAD2DEG),
     "navigation.magneticVariation":    ("mag_var_deg",  lambda v: v * RAD2DEG),
+    "navigation.gnss.satellites":         ("gps_sats",    lambda v: int(v)),
+    "navigation.gnss.horizontalDilution": ("gps_hdop",    lambda v: round(v, 2)),
+    "navigation.gnss.methodQuality":      ("gps_quality", lambda v: str(v)),
+    "navigation.datetime":                ("gps_datetime", lambda v: str(v)),
 }
 
 _SUBSCRIBE = {

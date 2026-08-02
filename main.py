@@ -12,6 +12,9 @@ import config
 from src.signalk_client import SignalKClient
 from src.true_wind import vent_reel_bateau
 from src.heading import cap_vrai
+from src.wind_shift import WindShiftTracker
+from src.track_logger import TrackLogger
+from src import gps_time
 from src.imu import IMU
 from src.kalman_wind import KalmanWind
 from src.data_logger import DataLogger, TelemetryLogger
@@ -98,6 +101,8 @@ def main():
     kalman = KalmanWind()
     logger = DataLogger()
     telemetry = TelemetryLogger()
+    track = TrackLogger()
+    wind_shift_tracker = WindShiftTracker()
 
     sail_config: str = args.sail
     polar = _load_polar(sail_config)
@@ -129,6 +134,7 @@ def main():
         print("\nArrêt propre...")
         logger.close()
         telemetry.close()
+        track.close()
         autopilot.close()
         sys.exit(0)
 
@@ -160,6 +166,9 @@ def main():
                 if data.cog_deg is None:
                     data.cog_deg = gps["cog_deg"]
                 gps_source = "backup"
+
+        # ── Horloge système calée sur le GPS (pas d'internet en mer) ──────────
+        gps_time.maybe_sync(data.gps_datetime)
 
         # ── Kalman ────────────────────────────────────────────────────────────
         if data.awa_deg is not None:
@@ -203,6 +212,15 @@ def main():
                                    data.cog_deg, data.sog_kts)
             if res is not None:
                 data.twa_deg, data.tws_kts = res
+
+        # ── Direction géographique du vent (TWD) + bascule ────────────────────
+        # TWD = cap + TWA (le TWA étant relatif à Cv). Sans compas, Cv=COG donc
+        # le TWD est relatif à la route fond (approximation, mais suffit pour
+        # détecter les bascules sur une fenêtre glissante).
+        twd = None
+        if cv is not None and data.twa_deg is not None:
+            twd = round((cv + data.twa_deg) % 360.0, 1)
+        wind_shift = wind_shift_tracker.update(twd)
 
         # ── VMG ───────────────────────────────────────────────────────────────
         vmg: float | None = None
@@ -250,11 +268,11 @@ def main():
                 continue
             dist = _distance_nm(data.lat, data.lon, vlat, vlon) if data.lat else None
             bearing = _bearing(data.lat, data.lon, vlat, vlon) if data.lat else None
-            cpa = None
+            cpa = tcpa = None
             if (data.lat and data.cog_deg is not None and data.sog_kts is not None
                     and v.get("cog") is not None and v.get("sog") is not None):
-                cpa = _cpa_nm(data.lat, data.lon, data.cog_deg, data.sog_kts,
-                              vlat, vlon, v["cog"], v["sog"])
+                cpa, tcpa = _cpa_tcpa(data.lat, data.lon, data.cog_deg, data.sog_kts,
+                                      vlat, vlon, v["cog"], v["sog"])
             ais_vessels.append({
                 "mmsi":     v.get("mmsi"),
                 "name":     v.get("name"),
@@ -263,6 +281,7 @@ def main():
                 "bearing":  round(bearing) if bearing is not None else None,
                 "distance": round(dist, 1) if dist is not None else None,
                 "cpa":      cpa,
+                "tcpa":     tcpa,
                 "sog":      v.get("sog"),
                 "cog":      v.get("cog"),
             })
@@ -296,6 +315,7 @@ def main():
                 print("\n[shutdown] Arrêt demandé depuis l'UI...")
                 logger.close()
                 telemetry.close()
+                track.close()
                 autopilot.close()
                 subprocess.run(["sudo", "shutdown", "-h", "now"], check=False)
                 sys.exit(0)
@@ -318,6 +338,9 @@ def main():
                             logger.is_active, temperature_air=data.temp_air_deg,
                             heading=heading_deg, drift=drift_deg)
             last_telemetry_s = now_wall
+
+        # ── Trace GPX ─────────────────────────────────────────────────────────
+        track.maybe_write(data.lat, data.lon, data.sog_kts, data.cog_deg)
 
         # ── Hot-reload polaire (thread réentraînement écrit sur disque) ───────
         if polar.reload_if_updated():
@@ -347,8 +370,13 @@ def main():
             temperature_air_c=_r(data.temp_air_deg, 1),
             heading=_r(heading_deg, 0),
             drift=_r(drift_deg, 1),
+            twd=twd,
+            wind_shift=wind_shift,
             pressure_trend=pressure_trend,
             gps_source=gps_source,
+            gps_sats=data.gps_sats,
+            gps_hdop=data.gps_hdop,
+            gps_quality=data.gps_quality,
             is_recording=logger.is_active,
             rec_duration=_r(rec_duration, 0),
             is_fresh=data.is_fresh(),
@@ -401,10 +429,11 @@ def _distance_nm(own_lat, own_lon, tgt_lat, tgt_lon) -> float | None:
     return math.sqrt(dlat ** 2 + dlon ** 2)
 
 
-def _cpa_nm(own_lat, own_lon, own_cog, own_sog,
-            tgt_lat, tgt_lon, tgt_cog, tgt_sog) -> float | None:
+def _cpa_tcpa(own_lat, own_lon, own_cog, own_sog,
+             tgt_lat, tgt_lon, tgt_cog, tgt_sog):
+    """Renvoie (CPA en NM, TCPA en minutes). TCPA None si déjà dépassé/immobile."""
     if None in (own_lat, own_lon, own_cog, own_sog, tgt_lat, tgt_lon, tgt_cog, tgt_sog):
-        return None
+        return None, None
     mid = math.radians((own_lat + tgt_lat) / 2)
     rx = (tgt_lon - own_lon) * 60 * math.cos(mid)
     ry = (tgt_lat - own_lat) * 60
@@ -415,12 +444,13 @@ def _cpa_nm(own_lat, own_lon, own_cog, own_sog,
     dvx, dvy = tgt_vx - own_vx, tgt_vy - own_vy
     dv2 = dvx ** 2 + dvy ** 2
     dist = math.sqrt(rx ** 2 + ry ** 2)
-    if dv2 < 1e-6:
-        return round(dist, 2)
-    tcpa = -(rx * dvx + ry * dvy) / dv2
-    if tcpa < 0:
-        return round(dist, 2)
-    return round(math.sqrt((rx + dvx * tcpa) ** 2 + (ry + dvy * tcpa) ** 2), 2)
+    if dv2 < 1e-6:                       # vitesse relative nulle
+        return round(dist, 2), None
+    tcpa_h = -(rx * dvx + ry * dvy) / dv2   # heures (NM / (NM/h))
+    if tcpa_h < 0:                       # point le plus proche déjà passé
+        return round(dist, 2), None
+    cpa = math.sqrt((rx + dvx * tcpa_h) ** 2 + (ry + dvy * tcpa_h) ** 2)
+    return round(cpa, 2), round(tcpa_h * 60.0, 1)
 
 
 def _compute_target_awa(polar: PolarModel, data, awa_filtered: float | None) -> float | None:

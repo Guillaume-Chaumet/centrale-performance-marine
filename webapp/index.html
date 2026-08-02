@@ -108,7 +108,8 @@ button { font-family: 'Archivo', sans-serif; }
         </div>
         <div style="margin-top:10px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">FILTRE KALMAN 1D · BNO055 ROLL-CORR · 10 Hz</div>
         <div id="t-headchip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">COG —° · CAP —° · DÉRIVE —°</div>
-        <div id="t-barochip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">— hPa · T.ext —° · T.boît —°</div>
+        <div id="t-barochip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">- hPa · T.ext -° · T.boît -°</div>
+        <div id="t-gpschip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">GPS - sats · HDOP -</div>
       </div>
 
       <!-- AWS + mini grid -->
@@ -578,7 +579,7 @@ function renderAIS(vessels) {
       <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.type || 'Navire'}${v.length ? ' · ' + v.length + 'm' : ''}</div></div>
       <span style="font:600 17px 'Barlow Condensed';color:var(--muted)">${v.bearing != null ? v.bearing + '°' : '—'}</span>
       <span style="font:600 17px 'Barlow Condensed';color:var(--ink)">${v.distance != null ? v.distance.toFixed(1) : '—'}</span>
-      <span style="font:700 17px 'Barlow Condensed';color:${cc}">${v.cpa != null ? v.cpa.toFixed(1) + ' NM' : '—'}</span>
+      <div><div style="font:700 17px 'Barlow Condensed';color:${cc}">${v.cpa != null ? v.cpa.toFixed(1) + ' NM' : '—'}</div>${v.tcpa != null ? `<div style="font:500 9px 'IBM Plex Mono',monospace;color:${cc}">T ${v.tcpa.toFixed(0)} min</div>` : ''}</div>
       <span style="font:600 17px 'Barlow Condensed';color:var(--ink)">${v.sog != null ? v.sog.toFixed(1) : '—'}</span></div>`;
   }).join('');
 
@@ -588,7 +589,7 @@ function renderAIS(vessels) {
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-top:1px solid var(--line)${highlight}">
       <div><div style="font:600 13px 'Archivo';color:var(--ink)">${v.name || v.mmsi}</div>
       <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.type || 'Navire'} · ${v.bearing != null ? v.bearing + '°' : '—'} · ${v.distance != null ? v.distance.toFixed(1) + ' NM' : '—'}</div></div>
-      <div style="text-align:right"><div style="font:700 18px 'Barlow Condensed';color:${cc}">CPA ${v.cpa != null ? v.cpa.toFixed(1) : '—'}</div>
+      <div style="text-align:right"><div style="font:700 18px 'Barlow Condensed';color:${cc}">CPA ${v.cpa != null ? v.cpa.toFixed(1) : '—'}${v.tcpa != null ? ' · ' + v.tcpa.toFixed(0) + 'min' : ''}</div>
       <div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--muted)">${v.sog != null ? v.sog.toFixed(1) + ' kn' : '—'}</div></div></div>`;
   }).join('');
 
@@ -662,16 +663,25 @@ function applyData(d) {
   set('t-vmg', fmt(d.vmg, 1)); set('m-vmg', fmt(d.vmg, 1));
 
   if (g('t-headchip')) {
-    const cog = d.cog != null ? Math.round(d.cog) + '°' : '—°';
-    const h  = d.heading != null ? Math.round(d.heading) + '°' : '—°';
-    const dr = d.drift != null ? (d.drift >= 0 ? '+' : '') + d.drift.toFixed(0) + '°' : '—°';
-    g('t-headchip').textContent = `COG ${cog} · CAP ${h} · DÉRIVE ${dr}`;
+    const cog = d.cog != null ? Math.round(d.cog) + '°' : '-°';
+    const h  = d.heading != null ? Math.round(d.heading) + '°' : '-°';
+    const dr = d.drift != null ? (d.drift >= 0 ? '+' : '') + d.drift.toFixed(0) + '°' : '-°';
+    const twd = d.twd != null ? Math.round(d.twd) + '°' : '-°';
+    const sh = d.wind_shift != null ? (d.wind_shift >= 0 ? '+' : '') + d.wind_shift.toFixed(0) + '°' : '-°';
+    g('t-headchip').textContent = `COG ${cog} · CAP ${h} · DÉRIVE ${dr} · TWD ${twd} · BASC ${sh}`;
   }
   if (g('t-barochip')) {
-    const p  = d.pressure_hpa != null ? d.pressure_hpa.toFixed(0) + ' hPa' : '— hPa';
-    const te = d.temperature_air_c != null ? d.temperature_air_c.toFixed(1) + '°' : '—°';
-    const tb = d.temperature_c != null ? d.temperature_c.toFixed(1) + '°' : '—°';
+    const p  = d.pressure_hpa != null ? d.pressure_hpa.toFixed(0) + ' hPa' : '- hPa';
+    const te = d.temperature_air_c != null ? d.temperature_air_c.toFixed(1) + '°' : '-°';
+    const tb = d.temperature_c != null ? d.temperature_c.toFixed(1) + '°' : '-°';
     g('t-barochip').textContent = `${p} · T.ext ${te} · T.boît ${tb}`;
+  }
+  if (g('t-gpschip')) {
+    const sats = d.gps_sats != null ? d.gps_sats : '-';
+    const hdop = d.gps_hdop != null ? d.gps_hdop.toFixed(1) : '-';
+    const col = d.gps_hdop == null ? 'var(--label)' : (d.gps_hdop <= 2 ? 'var(--goodtext)' : (d.gps_hdop <= 5 ? '#d8a534' : '#e0322c'));
+    g('t-gpschip').textContent = `GPS ${sats} sats · HDOP ${hdop}`;
+    g('t-gpschip').style.color = col;
   }
 
   const rdt = d.rendement != null ? Math.round(d.rendement * 100) : null;

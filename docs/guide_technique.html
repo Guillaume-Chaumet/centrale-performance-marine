@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide Technique — Centrale de Performance Marine</title>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --accent: #0066cc;
+    --accent2: #00897b;
+    --warn: #e65100;
+    --bg: #ffffff;
+    --panel: #f8f9fa;
+    --border: #dee2e6;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+    --keyword: #cba6f7;
+    --string: #a6e3a1;
+    --comment: #6c7086;
+    --number: #fab387;
+    --func: #89b4fa;
+    --type: #f9e2af;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink);
+    background: var(--bg);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+
+  h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    font-family: 'Helvetica Neue', sans-serif;
+    color: var(--ink);
+    border-bottom: 4px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 1.05em;
+    color: #666;
+    margin-bottom: 40px;
+  }
+
+  h2 {
+    font-size: 1.55em;
+    font-family: 'Helvetica Neue', sans-serif;
+    color: var(--accent);
+    margin-top: 52px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 1.2em;
+    font-family: 'Helvetica Neue', sans-serif;
+    color: var(--ink);
+    margin-top: 32px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+
+  h4 {
+    font-size: 1.0em;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-top: 20px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85em;
+  }
+
+  p { margin-bottom: 14px; }
+
+  a { color: var(--accent); }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 10px;
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 16px 0 20px 0;
+    page-break-inside: avoid;
+  }
+
+  code {
+    background: #eef2ff;
+    color: #3730a3;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 0.88em;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  .kw  { color: var(--keyword); }
+  .st  { color: var(--string); }
+  .cm  { color: var(--comment); font-style: italic; }
+  .nb  { color: var(--number); }
+  .fn  { color: var(--func); }
+  .tp  { color: var(--type); }
+  .hl  { background: rgba(255,255,255,0.08); display: block; border-left: 3px solid var(--accent); padding-left: 8px; margin-left: -8px; }
+
+  .box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    page-break-inside: avoid;
+  }
+
+  .box-warn {
+    background: #fff8f0;
+    border-color: #ffcc80;
+    border-left: 4px solid var(--warn);
+  }
+
+  .box-info {
+    background: #f0f7ff;
+    border-color: #90caf9;
+    border-left: 4px solid var(--accent);
+  }
+
+  .box-tip {
+    background: #f0fdf4;
+    border-color: #86efac;
+    border-left: 4px solid var(--accent2);
+  }
+
+  .box h4 { margin-top: 0; }
+
+  .schema {
+    background: var(--code-bg);
+    color: #a6adc8;
+    border-radius: 10px;
+    padding: 20px 22px;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    margin: 16px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px 0;
+    font-size: 14px;
+    page-break-inside: avoid;
+  }
+
+  th {
+    background: var(--ink);
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: var(--panel); }
+
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+    page-break-inside: avoid;
+  }
+
+  .toc h3 { margin-top: 0; margin-bottom: 12px; color: var(--accent); }
+
+  .toc ol { padding-left: 20px; }
+
+  .toc li { margin: 5px 0; font-family: 'Helvetica Neue', sans-serif; font-size: 0.9em; }
+
+  .toc a { text-decoration: none; color: var(--ink); }
+  .toc a:hover { color: var(--accent); }
+
+  .chip {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    padding: 2px 9px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.03em;
+  }
+
+  .chip-green { background: var(--accent2); }
+  .chip-orange { background: var(--warn); }
+
+  hr {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 40px 0;
+  }
+
+  ul, ol { padding-left: 24px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; }
+
+  .file-header {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #e2e8f0;
+    border-radius: 10px 10px 0 0;
+    padding: 12px 20px;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+    margin-top: 16px;
+  }
+
+  .file-header + pre { border-radius: 0 0 10px 10px; margin-top: 0; }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #ffbd2e; }
+  .dot-g { background: #28c840; }
+
+  @media print {
+    body { padding: 20px; font-size: 13px; }
+    pre { font-size: 11.5px; }
+    h2 { page-break-before: always; }
+    h2:first-of-type { page-break-before: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Guide Technique — Centrale de Performance Marine</h1>
+<p class="subtitle">Documentation complète — Hardware, protocoles, code Python commenté ligne par ligne</p>
+
+<div class="toc">
+  <h3>Table des matières</h3>
+  <ol>
+    <li><a href="#s1">Vue d'ensemble et objectifs</a></li>
+    <li><a href="#s2">Architecture — comment tout s'articule</a></li>
+    <li><a href="#s3">Hardware — chaque composant expliqué</a></li>
+    <li><a href="#s4">Protocoles de communication</a></li>
+    <li><a href="#s5">config.py — détection d'environnement</a></li>
+    <li><a href="#s6">src/signalk_client.py — lire les instruments</a></li>
+    <li><a href="#s7">src/imu.py — la centrale inertielle BNO055</a></li>
+    <li><a href="#s8">src/kalman_wind.py — filtrage du vent</a></li>
+    <li><a href="#s9">src/barometer.py — pression et météo</a></li>
+    <li><a href="#s10">src/gps.py — GPS de secours</a></li>
+    <li><a href="#s11">src/nmea_utils.py — construire des phrases NMEA</a></li>
+    <li><a href="#s12">src/data_logger.py — enregistrement CSV</a></li>
+    <li><a href="#s13">src/polar_model.py — machine learning polaires</a></li>
+    <li><a href="#s14">src/autopilot.py — contrôle du pilote automatique</a></li>
+    <li><a href="#s15">src/web_ui.py — interface web</a></li>
+    <li><a href="#s16">main.py — la boucle principale</a></li>
+    <li><a href="#s17">Scripts de déploiement</a></li>
+    <li><a href="#s18">Les 3 jalons du projet</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s1">1. Vue d'ensemble et objectifs</h2>
+
+<p>Le projet est une <strong>boîte noire embarquée</strong> sur un voilier. Elle se connecte au réseau d'instruments existants (girouette-anémomètre, loch, GPS…) sans rien modifier au câblage — elle "écoute" juste les données.</p>
+
+<p>Trois objectifs progressifs :</p>
+
+<table>
+  <tr><th>Jalon</th><th>Fonctionnalité</th><th>Matériel requis</th></tr>
+  <tr><td><strong>1 — Log</strong></td><td>Récupérer toutes les données instruments + IMU + baro, les enregistrer en CSV, afficher une interface web sur tablette</td><td>Pi + MiniPlex</td></tr>
+  <tr><td><strong>2 — Coach</strong></td><td>Entraîner un modèle XGBoost sur les CSV collectés, afficher le rendement polaire en temps réel (es-tu au bon angle ?)</td><td>+ BNO055 + BMP280</td></tr>
+  <tr><td><strong>3 — Auto</strong></td><td>Envoyer des commandes MWV au pilote automatique TP22 pour qu'il suive l'angle VMG optimal</td><td>+ câble NMEA TP22</td></tr>
+</table>
+
+<div class="box box-info">
+  <h4>Le principe fondamental</h4>
+  <p>Le Pi ne touche à <em>rien</em> dans les instruments du bord. Il <strong>lit</strong> les données via Signal K (un serveur open-source déjà installé sur le réseau), les traite, et <strong>écrit</strong> seulement sur Out1 du MiniPlex (en mode Override, qui a la priorité sur tout). Si le Pi s'éteint, le MiniPlex rebascule automatiquement vers les instruments bruts après 10 secondes.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s2">2. Architecture — comment tout s'articule</h2>
+
+<div class="schema">┌─────────────────────────────────────────────────────────────────────────┐
+│                         RÉSEAU NMEA DU VOILIER                          │
+│                                                                          │
+│   Girouette/Anémo ──── NMEA 0183 ────┐                                  │
+│   Loch/Sondeur ──────── NMEA 0183 ───┤                                  │
+│   GPS (VHF) ────────── AIS + RMC ────┤                                  │
+│   GX2200 Radio ──────── NMEA 0183 ───┘                                  │
+│                                  ↓                                       │
+│                       ┌────────────────┐                                 │
+│                       │  MiniPlex-3USB │  ← concentrateur NMEA           │
+│                       │   In1→In4      │    multiplexe toutes les sources │
+│                       └───────┬────────┘                                 │
+│                               │ USB-A ↔ USB-B                           │
+│                               ↓                                          │
+│                    ┌──────────────────────┐                              │
+│                    │   Raspberry Pi 5     │                              │
+│                    │                      │                              │
+│                    │  Signal K :3000      │  ← lit /dev/ttyACM0         │
+│                    │       ↓ WebSocket    │    parse toutes les phrases  │
+│                    │  Notre code Python   │                              │
+│                    │   ├── IMU BNO055     │  I2C 0x28                   │
+│                    │   ├── Baro BMP280    │  I2C 0x76                   │
+│                    │   ├── GPS backup     │  USB /dev/ttyUSB1           │
+│                    │   ├── Kalman AWA     │  filtre le vent              │
+│                    │   ├── XGBoost polar  │  ML performance              │
+│                    │   └── Web UI :8080   │  interface tablette          │
+│                    │         ↓ MWV serial │                              │
+│                    │   /dev/ttyUSB0 ──────┼──→ MiniPlex Out1 Override   │
+│                    └──────────────────────┘         ↓                   │
+│                                                  Simrad TP22            │
+│                                              (pilote automatique)        │
+└─────────────────────────────────────────────────────────────────────────┘</div>
+
+<h3>Flux de données en temps réel (10 Hz)</h3>
+
+<div class="schema">Instruments ──→ MiniPlex ──→ /dev/ttyACM0 ──→ Signal K
+                                                         ↓ WebSocket ws://localhost:3000
+                                               signalk_client.py (thread background)
+                                                         ↓ InstrumentData (thread-safe)
+IMU BNO055 ──→ imu.py ──→ roll_deg ──────────────────→ main.py (boucle 10 Hz)
+                                                         │
+                                               ┌─────────┼──────────┬──────────┐
+                                               ↓         ↓          ↓          ↓
+                                          kalman.py   vmg calc   polar.py  baro.py
+                                          awa_filtré  VMG (nœuds) rendement  pression
+                                               └─────────┼──────────┘
+                                                         ↓
+                                              ┌──────────────────┐
+                                              │    UIState       │  ← thread-safe snapshot
+                                              └────────┬─────────┘
+                                                       │ WebSocket :8081
+                                                       ↓
+                                                  Tablette / iPad
+                                                  http://10.10.10.1:8080</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s3">3. Hardware — chaque composant expliqué</h2>
+
+<h3>3.1 Raspberry Pi 5</h3>
+
+<p>Le Raspberry Pi 5 est un mini-ordinateur de la taille d'une carte de crédit. Il tourne sous Linux (Debian Bookworm via OpenPlotter). C'est lui qui fait tourner tout le code Python.</p>
+
+<div class="box">
+  <h4>Spécifications Pi 5 pertinentes pour ce projet</h4>
+  <table>
+    <tr><th>Caractéristique</th><th>Valeur</th><th>Utilisation</th></tr>
+    <tr><td>CPU</td><td>Cortex-A76 quadcore 2.4 GHz</td><td>Kalman, XGBoost, WebSocket</td></tr>
+    <tr><td>RAM</td><td>4 Go</td><td>Plus que suffisant (on utilise ~200 Mo)</td></tr>
+    <tr><td>GPIO</td><td>40 broches</td><td>I2C (SDA/SCL) pour IMU et baro</td></tr>
+    <tr><td>USB</td><td>4 × USB-A (2× USB3)</td><td>MiniPlex, GPS backup</td></tr>
+    <tr><td>Alimentation</td><td>5V / 5A = 27W (USB-C ou GPIO)</td><td>Buck converter 12V→5V/5A</td></tr>
+    <tr><td>Stockage</td><td>microSD 32 Go</td><td>OS + données CSV + modèles ML</td></tr>
+  </table>
+</div>
+
+<h3>3.2 MiniPlex-3USB</h3>
+
+<p>Le MiniPlex-3USB est un <strong>multiplexeur NMEA 0183</strong>. Son rôle : recevoir les phrases NMEA de tous les instruments du bord (4 entrées) et les fusionner en un seul flux USB vers le Pi.</p>
+
+<div class="box box-warn">
+  <h4>Points critiques MiniPlex</h4>
+  <ul>
+    <li><strong>In4 est lié à Out1 speed</strong> — Le GX2200 (radio VHF, 38400 bauds) doit être sur In1, JAMAIS sur In4, sinon la vitesse de Out1 serait figée à 38400.</li>
+    <li><strong>Out1 en mode Override</strong> — Quand le Pi envoie des MWV, il a priorité totale sur Out1. Si le Pi s'arrête → rebascule automatique en 10s.</li>
+    <li><strong>Un seul émetteur vers TP22</strong> — Le mode Override gère ça, ne pas configurer d'autres routes vers Out1.</li>
+  </ul>
+</div>
+
+<p>Vu depuis le Pi, le MiniPlex apparaît comme <code>/dev/ttyACM0</code> (interface USB CDC — "Communication Device Class"). C'est Signal K qui lit ce port, pas notre code directement.</p>
+
+<h3>3.3 IMU BNO055 <span class="chip">I2C 0x28</span></h3>
+
+<p>Le BNO055 est une <strong>centrale inertielle 9 axes</strong> (accéléromètre + gyroscope + magnétomètre). Il contient un processeur intégré qui fusionne ces 3 capteurs pour donner directement des angles d'Euler (roulis, tangage, cap) sans calcul de notre côté.</p>
+
+<div class="box">
+  <h4>Branchement GPIO Pi 5</h4>
+  <table>
+    <tr><th>Pin BNO055</th><th>Pin Pi 5</th><th>Numéro physique</th><th>Rôle</th></tr>
+    <tr><td>VCC</td><td>3.3V</td><td>Pin 1</td><td>Alimentation 3.3V</td></tr>
+    <tr><td>GND</td><td>GND</td><td>Pin 6</td><td>Masse commune</td></tr>
+    <tr><td>SDA</td><td>GPIO2</td><td>Pin 3</td><td>Données I2C</td></tr>
+    <tr><td>SCL</td><td>GPIO3</td><td>Pin 5</td><td>Horloge I2C</td></tr>
+  </table>
+  <p style="margin:0;font-size:0.9em;color:#666">Orientation physique : axe X pointant vers l'étrave, Y vers bâbord, Z vers le ciel.</p>
+</div>
+
+<p>On lit les <strong>registres Euler</strong> à l'adresse 0x1A–0x1F. Chaque angle est codé sur 2 octets (little-endian, signé) avec une résolution de 1/16°.</p>
+
+<h3>3.4 Baromètre BMP280 <span class="chip">I2C 0x76</span></h3>
+
+<p>Le BMP280 mesure la pression atmosphérique et la température. Branché sur les mêmes broches I2C que le BNO055 (c'est le principe du bus : plusieurs capteurs sur 2 fils, chacun avec une adresse différente).</p>
+
+<p>La pression brute du capteur nécessite une <strong>compensation mathématique</strong> (formule du datasheet BMP280) qui utilise des coefficients de calibration stockés dans la mémoire du capteur lui-même. Sans cette compensation, la valeur lue n'a aucun sens.</p>
+
+<h3>3.5 GPS Neo-M9N <span class="chip">USB backup</span></h3>
+
+<p>GPS de secours sur <code>/dev/ttyUSB1</code>. N'est utilisé que si Signal K ne fournit pas de position GPS (instruments HS, ou en zone sans couverture). Envoie des phrases NMEA standard <code>$GPRMC</code> / <code>$GNRMC</code>.</p>
+
+<h3>3.6 Simrad TP22</h3>
+
+<p>Pilote automatique fonctionnant en <strong>mode Conservateur d'Allure</strong> : il reçoit une phrase MWV (angle de vent apparent cible) et gouverne pour maintenir ce cap. Le câblage pour le Jalon 3 est simple :</p>
+
+<div class="box">
+  <table>
+    <tr><th>Fil MiniPlex Out1</th><th>Fil TP22</th><th>Couleur TP22</th></tr>
+    <tr><td>Out1-A (+)</td><td>Signal</td><td>Rouge</td></tr>
+    <tr><td>Out1-B (−)</td><td>Commun</td><td>Bleu</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s4">4. Protocoles de communication</h2>
+
+<h3>4.1 NMEA 0183</h3>
+
+<p>NMEA 0183 est le standard de communication des instruments marins depuis les années 80. C'est du texte ASCII sur une liaison série (typiquement 4800 ou 38400 bauds). Chaque "phrase" commence par <code>$</code> et se termine par un checksum.</p>
+
+<pre>$WIMWV,045.0,R,12.5,N,A*1B&lt;CR&gt;&lt;LF&gt;
+ │      │    │  │   │ │  └─ checksum XOR de tout ce qui est entre $ et *
+ │      │    │  │   │ └──── A = données valides (V = invalides)
+ │      │    │  │   └────── unité N = nœuds
+ │      │    │  └────────── vitesse vent apparent : 12.5
+ │      │    └───────────── R = relatif (par rapport à la proue)
+ │      └────────────────── angle vent apparent : 045.0°
+ └───────────────────────── WIMWV = Wind speed and angle, Measured, relative Wind Velocity</pre>
+
+<p>Exemples de phrases utilisées dans le projet :</p>
+
+<table>
+  <tr><th>Phrase</th><th>Contenu</th><th>Source</th></tr>
+  <tr><td><code>$WIMWV</code></td><td>Vent apparent (angle + vitesse)</td><td>Girouette-anémomètre → MiniPlex → Signal K</td></tr>
+  <tr><td><code>$IIMWV</code></td><td>Vent apparent (même chose, préfixe différent)</td><td>Idem</td></tr>
+  <tr><td><code>$IIVHW</code></td><td>Vitesse sur l'eau (loch)</td><td>Loch → MiniPlex → Signal K</td></tr>
+  <tr><td><code>$GPRMC</code></td><td>Position GPS + vitesse sol + cap</td><td>GPS → Signal K ou GPS backup</td></tr>
+  <tr><td><code>$AIVDM</code></td><td>AIS — position des autres navires</td><td>VHF GX2200 → MiniPlex → Signal K</td></tr>
+  <tr><td><code>$WIMWV</code></td><td>Commande angle vent → TP22</td><td>Notre code → MiniPlex Out1 Override</td></tr>
+</table>
+
+<h3>4.2 Signal K</h3>
+
+<p>Signal K est un serveur open-source qui tourne sur le Pi. Il lit le MiniPlex (toutes les phrases NMEA), les parse, et expose les données dans un <strong>format JSON unifié via WebSocket</strong>. Plus besoin de parser soi-même chaque phrase NMEA — Signal K s'en charge.</p>
+
+<p>Signal K organise les données dans une <strong>hiérarchie de "paths"</strong> :</p>
+
+<pre>{
+  "environment.wind.angleApparent": 0.785,  &lt;!-- radians ! --&gt;
+  "environment.wind.speedApparent": 6.43,   &lt;!-- m/s ! --&gt;
+  "navigation.speedThroughWater":   3.09,   &lt;!-- m/s ! --&gt;
+  "navigation.position": {
+    "latitude": 47.3,
+    "longitude": -2.1
+  }
+}</pre>
+
+<div class="box box-warn">
+  <h4>Signal K utilise des unités SI, pas marines</h4>
+  <p>Tous les angles sont en <strong>radians</strong> (pas degrés), toutes les vitesses en <strong>m/s</strong> (pas nœuds). Notre code convertit systématiquement :
+  <code>×(180/π)</code> pour les angles, <code>×1.94384</code> pour les vitesses.</p>
+</div>
+
+<p>On s'abonne aux données via WebSocket avec un message JSON :</p>
+
+<pre>{
+  "context": "vessels.self",
+  "subscribe": [
+    {"path": "environment.wind.angleApparent", "period": 1000},
+    ...
+  ]
+}</pre>
+
+<h3>4.3 I2C — le bus pour les capteurs</h3>
+
+<p>I2C (Inter-Integrated Circuit) est un protocole de communication sur 2 fils : SDA (données) et SCL (horloge). Plusieurs capteurs partagent les mêmes 2 fils — chacun est distingué par son <strong>adresse 7 bits unique</strong>.</p>
+
+<div class="schema">Pi GPIO                    Sur le même bus
+   Pin 3 (SDA) ────────────┬──────────────────────────┐
+   Pin 5 (SCL) ────────────┼──────────────────────────┼───
+                           │                           │
+                    ┌──────┴──────┐          ┌────────┴────┐
+                    │  BNO055     │          │   BMP280    │
+                    │ adresse 0x28│          │ adresse 0x76│
+                    └─────────────┘          └─────────────┘
+                      IMU 9 axes               Baromètre</div>
+
+<p>Pour lire un registre I2C : le Pi envoie l'adresse du capteur + le numéro du registre, le capteur répond avec la valeur. <code>smbus2</code> est la librairie Python qui fait ça.</p>
+
+<h3>4.4 WebSocket — notre interface web</h3>
+
+<p>Le WebSocket est une connexion bidirectionnelle persistante entre le navigateur et notre serveur Python. Contrairement à HTTP classique (requête → réponse), le WebSocket permet au serveur d'envoyer des données à tout moment, sans que le client les demande. C'est parfait pour de la télémétrie temps réel.</p>
+
+<div class="schema">Navigateur tablette               Pi (main.py)
+      │                                  │
+      │──── connexion WS :8081 ─────────→│
+      │                                  │
+      │←─── JSON toutes les secondes ────│  {"awa": 45.2, "aws": 12.1, ...}
+      │←─── JSON toutes les secondes ────│
+      │                                  │
+      │──── {"type":"recording","value":"start"} ──→│  commande UI → Pi</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s5">5. config.py — détection d'environnement</h2>
+
+<p>Ce fichier gère la différence entre le Mac (développement, pas de hardware) et le Pi (production, tout branché). Il utilise <code>platform.machine()</code> qui retourne <code>"aarch64"</code> sur le Pi et <code>"x86_64"</code> (ou <code>"arm64"</code>) sur Mac.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  config.py
+</div>
+<pre><code><span class="kw">import</span> os
+<span class="kw">import</span> platform
+
+<span class="cm"># aarch64 = CPU ARM 64 bits = Raspberry Pi</span>
+IS_PI = platform.machine().startswith(<span class="st">"aarch"</span>) <span class="kw">or</span> os.path.exists(<span class="st">"/proc/device-tree/model"</span>)
+
+<span class="cm"># Tous les chemins et adresses sont configurables par variables d'environnement.
+# Sur le bateau on peut faire : export TP22_PORT=/dev/ttyUSB2 si le port change.</span>
+
+SIGNALK_HOST = os.getenv(<span class="st">"SIGNALK_HOST"</span>, <span class="st">"localhost"</span>)
+SIGNALK_WS_PORT = <span class="fn">int</span>(os.getenv(<span class="st">"SIGNALK_WS_PORT"</span>, <span class="st">"3000"</span>))
+
+<span class="cm"># /dev/ttyACM0 = MiniPlex USB (interface série virtuelle over USB)
+# None sur Mac = pas de matériel</span>
+MINIPLEX_PORT = os.getenv(<span class="st">"MINIPLEX_PORT"</span>, <span class="st">"/dev/ttyACM0"</span> <span class="kw">if</span> IS_PI <span class="kw">else</span> <span class="kw">None</span>)
+
+<span class="cm"># Port Out1 MiniPlex → TP22. /dev/ttyUSB0 = adaptateur USB-série</span>
+TP22_PORT = os.getenv(<span class="st">"TP22_PORT"</span>, <span class="st">"/dev/ttyUSB0"</span> <span class="kw">if</span> IS_PI <span class="kw">else</span> <span class="kw">None</span>)
+TP22_BAUD = <span class="nb">4800</span>
+
+IMU_I2C_ADDRESS = <span class="nb">0x28</span>    <span class="cm"># BNO055, adresse fixe</span>
+BARO_I2C_ADDRESS = <span class="fn">int</span>(os.getenv(<span class="st">"BARO_I2C_ADDRESS"</span>, <span class="st">"0x76"</span>), <span class="nb">16</span>)  <span class="cm"># BMP280 : 0x76 ou 0x77</span>
+GPS_PORT = os.getenv(<span class="st">"GPS_PORT"</span>, <span class="st">"/dev/ttyUSB1"</span> <span class="kw">if</span> IS_PI <span class="kw">else</span> <span class="kw">None</span>)
+GPS_BAUD = <span class="fn">int</span>(os.getenv(<span class="st">"GPS_BAUD"</span>, <span class="st">"9600"</span>))
+LOG_DIR = os.getenv(<span class="st">"LOG_DIR"</span>, <span class="st">"data"</span>)</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s6">6. src/signalk_client.py — lire les instruments</h2>
+
+<p>Ce fichier crée une connexion WebSocket permanente vers Signal K et maintient à jour un objet <code>InstrumentData</code> avec les dernières valeurs des instruments. Il tourne dans un <strong>thread séparé</strong> pour ne pas bloquer la boucle principale.</p>
+
+<h3>Pourquoi un thread séparé ?</h3>
+
+<p>La boucle principale doit tourner à 10 Hz (une itération toutes les 100ms). Attendre une réponse WebSocket bloquerait cette boucle. La solution : le thread SignalK tourne en parallèle et met à jour les données. La boucle principale lit ces données sans attendre. On protège les accès concurrents avec un <code>threading.Lock()</code>.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/signalk_client.py — structure de données
+</div>
+<pre><code><span class="kw">@dataclass</span>
+<span class="kw">class</span> <span class="tp">InstrumentData</span>:
+    awa_deg: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Angle vent apparent</span>
+    aws_kts: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Vitesse vent apparent</span>
+    twa_deg: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Angle vent réel (calculé par Signal K)</span>
+    tws_kts: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Vitesse vent réel</span>
+    stw_kts: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Speed Through Water (loch)</span>
+    sog_kts: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Speed Over Ground (GPS)</span>
+    cog_deg: Optional[<span class="fn">float</span>] = <span class="kw">None</span>   <span class="cm"># Course Over Ground</span>
+    heel_deg: Optional[<span class="fn">float</span>] = <span class="kw">None</span>  <span class="cm"># Gîte (depuis capteur attitude si dispo)</span>
+    lat: Optional[<span class="fn">float</span>] = <span class="kw">None</span>
+    lon: Optional[<span class="fn">float</span>] = <span class="kw">None</span>
+    updated_at: <span class="fn">float</span> = <span class="nb">0.0</span>           <span class="cm"># timestamp du dernier update</span>
+
+    <span class="kw">def</span> <span class="fn">is_fresh</span>(self, max_age_s=<span class="nb">10.0</span>) -> <span class="fn">bool</span>:
+        <span class="cm"># Données "fraîches" = reçues il y a moins de 10 secondes
+        # Si is_fresh() est False : les instruments ne répondent plus → alerte</span>
+        <span class="kw">return</span> (time.monotonic() - self.updated_at) &lt; max_age_s</code></pre>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/signalk_client.py — table de conversion des paths
+</div>
+<pre><code><span class="cm"># Chaque path Signal K → (champ Python, facteur de conversion)
+# RAD2DEG = 180/π ≈ 57.296    MS2KTS = 1 m/s = 1.94384 nœuds</span>
+_PATHS = {
+    <span class="st">"environment.wind.angleApparent"</span>:  (<span class="st">"awa_deg"</span>,   RAD2DEG),
+    <span class="st">"environment.wind.speedApparent"</span>:  (<span class="st">"aws_kts"</span>,   MS2KTS),
+    <span class="st">"environment.wind.angleTrueWater"</span>: (<span class="st">"twa_deg"</span>,   RAD2DEG),
+    <span class="st">"environment.wind.speedTrue"</span>:      (<span class="st">"tws_kts"</span>,   MS2KTS),
+    <span class="st">"navigation.speedThroughWater"</span>:    (<span class="st">"stw_kts"</span>,   MS2KTS),
+    <span class="st">"navigation.speedOverGround"</span>:      (<span class="st">"sog_kts"</span>,   MS2KTS),
+    <span class="st">"navigation.courseOverGroundTrue"</span>: (<span class="st">"cog_deg"</span>,   RAD2DEG),
+    <span class="st">"navigation.attitude.roll"</span>:        (<span class="st">"heel_deg"</span>,  RAD2DEG),
+}</code></pre>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/signalk_client.py — boucle de connexion (résiliente)
+</div>
+<pre><code><span class="kw">async def</span> <span class="fn">_listen</span>(self):
+    url = <span class="st">f"ws://localhost:3000/signalk/v1/stream?subscribe=none"</span>
+    <span class="kw">while True</span>:  <span class="cm"># boucle infinie = reconnexion automatique si Signal K redémarre</span>
+        <span class="kw">try</span>:
+            <span class="kw">async with</span> websockets.connect(url) <span class="kw">as</span> ws:
+                <span class="kw">await</span> ws.send(json.dumps(_SUBSCRIBE))      <span class="cm"># s'abonner aux instruments</span>
+                <span class="kw">await</span> ws.send(json.dumps(_AIS_SUBSCRIBE))  <span class="cm"># s'abonner aux cibles AIS</span>
+                <span class="kw">async for</span> msg <span class="kw">in</span> ws:
+                    self._parse(json.loads(msg))  <span class="cm"># chaque message reçu</span>
+        <span class="kw">except Exception</span>:
+            <span class="kw">await</span> asyncio.sleep(<span class="nb">3.0</span>)  <span class="cm"># attendre 3s avant de se reconnecter</span></code></pre>
+
+<h3>AIS — traçage des autres navires</h3>
+
+<p>Le même WebSocket Signal K reçoit les positions AIS (Automatic Identification System) des autres navires. Le code maintient un dictionnaire <code>_ais</code> avec les positions, SOG, COG, nom et type de chaque navire identifié par son MMSI. Les cibles non vues depuis 5 minutes sont supprimées automatiquement.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s7">7. src/imu.py — la centrale inertielle BNO055</h2>
+
+<p>Sur le Pi, on lit les angles d'Euler directement depuis les registres du BNO055. Sur Mac, un stub simule un roulis sinusoïdal (houle). Si le BNO055 est absent (capteur pas encore branché), le code bascule automatiquement sur le stub au lieu de planter.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/imu.py — lecture des registres Euler BNO055
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">_init_bno055</span>(self):
+    <span class="cm"># Registre 0x3D = OPR_MODE (Operating Mode)
+    # Valeur 0x0C = Mode NDOF (Nine Degrees Of Freedom)
+    # Le BNO055 fusionne lui-même accel + gyro + magneto → angles directs</span>
+    self.bus.write_byte_data(self.addr, <span class="nb">0x3D</span>, <span class="nb">0x0C</span>)
+
+<span class="kw">def</span> <span class="fn">read</span>(self) -> <span class="fn">dict</span>:
+    <span class="cm"># Registres 0x1A à 0x1F = Euler Angles (Heading, Roll, Pitch)
+    # 6 octets, 2 par angle, little-endian (octet faible en premier)
+    # Résolution : 1/16° par unité (donc diviser par 16.0)</span>
+    data = self.bus.read_i2c_block_data(self.addr, <span class="nb">0x1A</span>, <span class="nb">6</span>)
+
+    <span class="kw">def</span> <span class="fn">to_signed</span>(high, low):
+        val = (high &lt;&lt; <span class="nb">8</span>) | low       <span class="cm"># assembler les 2 octets</span>
+        <span class="kw">return</span> val - <span class="nb">65536</span> <span class="kw">if</span> val > <span class="nb">32767</span> <span class="kw">else</span> val  <span class="cm"># convertir en signé</span>
+
+    yaw   = <span class="fn">to_signed</span>(data[<span class="nb">1</span>], data[<span class="nb">0</span>]) / <span class="nb">16.0</span>
+    roll  = <span class="fn">to_signed</span>(data[<span class="nb">3</span>], data[<span class="nb">2</span>]) / <span class="nb">16.0</span>
+    pitch = <span class="fn">to_signed</span>(data[<span class="nb">5</span>], data[<span class="nb">4</span>]) / <span class="nb">16.0</span>
+    <span class="kw">return</span> {<span class="st">"roll"</span>: roll, <span class="st">"pitch"</span>: pitch, <span class="st">"yaw"</span>: yaw}</code></pre>
+
+<div class="box box-info">
+  <h4>Pourquoi le roulis pour corriger le vent ?</h4>
+  <p>Quand le voilier gîte, la girouette (en haut du mât) se déplace latéralement. Ça crée une erreur sur l'angle de vent apparent : le vent semble venir d'un angle légèrement différent. La correction Kalman (voir section 8) compense cet effet : <code>Δ_AWA ≈ roll × sin(AWA) × 0.5</code></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s8">8. src/kalman_wind.py — filtrage du vent</h2>
+
+<p>Le filtre de Kalman est un algorithme mathématique qui combine une <strong>mesure bruitée</strong> (la girouette, qui oscille) avec un <strong>modèle prédictif</strong> (l'angle ne change pas brusquement) pour produire une estimation <em>optimale</em>.</p>
+
+<h3>Intuition en langage simple</h3>
+
+<p>Imagine que tu veux savoir la température exacte dans une pièce. Tu as un thermomètre qui fluctue légèrement (bruit de mesure) et tu sais que la température ne peut pas changer de 10° en 1 seconde (modèle physique). Le filtre de Kalman pondère intelligemment : si la mesure change beaucoup, c'est probablement du bruit → on fait moins confiance. Si elle change peu, c'est probablement réel → on met à jour.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/kalman_wind.py — paramètres du filtre
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">__init__</span>(self, process_var=<span class="nb">0.5</span>, measure_var=<span class="nb">8.0</span>):
+    kf = KalmanFilter(dim_x=<span class="nb">1</span>, dim_z=<span class="nb">1</span>)  <span class="cm"># 1 variable d'état (AWA), 1 mesure</span>
+
+    kf.x = np.array([[<span class="nb">0.0</span>]])   <span class="cm"># état initial : AWA = 0°</span>
+    kf.F = np.array([[<span class="nb">1.0</span>]])   <span class="cm"># modèle de transition : AWA_suivant = AWA_actuel (constant)</span>
+    kf.H = np.array([[<span class="nb">1.0</span>]])   <span class="cm"># modèle de mesure : on mesure directement l'état</span>
+    kf.P = np.array([[<span class="nb">50.0</span>]])  <span class="cm"># incertitude initiale : 50° (on ne sait pas)</span>
+    kf.Q = np.array([[<span class="nb">0.5</span>]])   <span class="cm"># bruit de processus : l'AWA peut changer de 0.5°/tick</span>
+    kf.R = np.array([[<span class="nb">8.0</span>]])   <span class="cm"># bruit de mesure : la girouette a ±8° d'erreur typique</span></code></pre>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/kalman_wind.py — mise à jour avec correction roulis
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">update</span>(self, awa_raw: <span class="fn">float</span>, roll_deg: <span class="fn">float</span>) -> <span class="fn">float</span>:
+    <span class="cm"># Correction de l'effet de gîte sur la girouette
+    # Quand le voilier gîte de 10° et que le vent est à 45°,
+    # la girouette semble déplacée de ~10 × sin(45°) × 0.5 ≈ 3.5°</span>
+    roll_correction = roll_deg * math.sin(math.radians(<span class="fn">abs</span>(awa_raw))) * <span class="nb">0.5</span>
+    z = np.array([[awa_raw - roll_correction]])  <span class="cm"># mesure corrigée</span>
+
+    self._kf.predict()   <span class="cm"># étape prédiction : avancer le modèle d'un tick</span>
+    self._kf.update(z)   <span class="cm"># étape correction : fusionner avec la mesure</span>
+    <span class="kw">return</span> <span class="fn">float</span>(self._kf.x[<span class="nb">0</span>, <span class="nb">0</span>])
+
+<span class="kw">def</span> <span class="fn">predict_only</span>(self) -> <span class="fn">float</span>:
+    <span class="cm"># Appelé quand l'IMU "tick" à 10Hz mais que le vent n'a pas changé
+    # On fait avancer le filtre sans nouvelle mesure → lissage entre mesures</span>
+    self._kf.predict()
+    <span class="kw">return</span> <span class="fn">float</span>(self._kf.x[<span class="nb">0</span>, <span class="nb">0</span>])</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s9">9. src/barometer.py — pression et météo</h2>
+
+<p>Le BMP280 mesure la pression et la température. La pression brute n'a aucune signification sans <strong>compensation avec des coefficients de calibration</strong> stockés dans le capteur lui-même (différents d'un capteur à l'autre).</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/barometer.py — lecture des coefficients de calibration
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">_read_calibration</span>(self):
+    <span class="cm"># Registres 0x88→0x9F = 24 octets de coefficients de calibration
+    # Chaque capteur BMP280 a ses propres valeurs, gravées en usine</span>
+    c = self._bus.read_i2c_block_data(_BARO_ADDR, <span class="nb">0x88</span>, <span class="nb">24</span>)
+    self._T1 = (c[<span class="nb">1</span>] &lt;&lt; <span class="nb">8</span>) | c[<span class="nb">0</span>]    <span class="cm"># non signé</span>
+    self._T2 = _s16((c[<span class="nb">3</span>] &lt;&lt; <span class="nb">8</span>) | c[<span class="nb">2</span>])  <span class="cm"># signé</span>
+    <span class="cm"># ... (12 coefficients en tout pour T et P)</span></code></pre>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/barometer.py — formule de compensation (datasheet BMP280)
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">_compensate</span>(raw_t, raw_p, T1, T2, T3, P1...P9):
+    <span class="cm"># Phase 1 : calcul température
+    # t_fine est une variable intermédiaire utilisée aussi pour la pression</span>
+    var1 = raw_t / <span class="nb">16384.0</span> - T1 / <span class="nb">1024.0</span>
+    var2 = (raw_t / <span class="nb">131072.0</span> - T1 / <span class="nb">8192.0</span>) ** <span class="nb">2</span>
+    t_fine = var1 * T2 + var2 * T3
+    temp = <span class="fn">round</span>(t_fine / <span class="nb">5120.0</span>, <span class="nb">1</span>)
+
+    <span class="cm"># Phase 2 : calcul pression (utilise t_fine de la température)
+    # Formule polynomiale complexe — directement tirée du datasheet BMP280</span>
+    var1 = t_fine / <span class="nb">2.0</span> - <span class="nb">64000.0</span>
+    <span class="cm"># ... 8 lignes de calcul → pression en Pascal → convertir en hPa ÷100</span>
+    press = press + (var1 + var2 + P7) / <span class="nb">16.0</span>
+    <span class="kw">return</span> temp, <span class="fn">round</span>(press / <span class="nb">100.0</span>, <span class="nb">1</span>)  <span class="cm"># hPa</span></code></pre>
+
+<h3>Alerte dépression</h3>
+
+<p>Dans <code>main.py</code>, on garde un historique de pression des 3 dernières heures (1 sample/minute). Si la pression chute de plus de 3 hPa en 3h, c'est le signe d'une dépression qui approche rapidement → alerte dans l'UI.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s10">10. src/gps.py — GPS de secours</h2>
+
+<p>Si Signal K ne fournit pas de position (instruments HS), un module GPS USB de secours prend le relais. Il tourne dans un <strong>thread daemon</strong> (le thread s'arrête quand le programme principal s'arrête).</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/gps.py — parsing de la phrase $GPRMC
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">_parse_rmc</span>(self, sentence: <span class="fn">str</span>):
+    <span class="cm"># $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+    #               │  │           │           │      │
+    #               │  position    longitude    SOG   COG
+    #               A = données valides, V = invalides</span>
+    parts = sentence.split(<span class="st">","</span>)
+    <span class="kw">if</span> parts[<span class="nb">2</span>] != <span class="st">"A"</span>:  <span class="cm"># A = Active = fix GPS valide</span>
+        <span class="kw">return</span>
+
+    <span class="cm"># Latitude : format DDMM.MMMM → convertir en degrés décimaux
+    # Ex: 4807.038 = 48° 07.038' = 48 + 7.038/60 = 48.1173°</span>
+    lat_r = <span class="fn">float</span>(parts[<span class="nb">3</span>])
+    lat = <span class="fn">int</span>(lat_r / <span class="nb">100</span>) + (lat_r % <span class="nb">100</span>) / <span class="nb">60</span>
+    <span class="kw">if</span> parts[<span class="nb">4</span>] == <span class="st">"S"</span>:
+        lat = -lat  <span class="cm"># hémisphère sud = latitude négative</span></code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s11">11. src/nmea_utils.py — construire des phrases NMEA</h2>
+
+<p>Pour envoyer des commandes au TP22, on doit fabriquer des phrases NMEA valides. Le checksum est un XOR (OU exclusif bit à bit) de tous les octets entre <code>$</code> et <code>*</code>.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/nmea_utils.py
+</div>
+<pre><code><span class="kw">import</span> functools
+
+<span class="kw">def</span> <span class="fn">checksum</span>(sentence: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="cm"># XOR de tous les codes ASCII des caractères
+    # functools.reduce applique XOR successivement sur tous les éléments
+    # format(..., "02X") → hex sur 2 caractères en majuscules (ex: "1B")</span>
+    <span class="kw">return</span> <span class="fn">format</span>(functools.reduce(<span class="kw">lambda</span> a, b: a ^ b,
+                                  (<span class="fn">ord</span>(c) <span class="kw">for</span> c <span class="kw">in</span> sentence)), <span class="st">"02X"</span>)
+
+<span class="kw">def</span> <span class="fn">build_mwv</span>(awa_deg: <span class="fn">float</span>, aws_kts: <span class="fn">float</span>) -> <span class="fn">str</span>:
+    <span class="cm"># WIMWV = Wind speed and angle, Measured relative Wind Velocity
+    # R = Relative (par rapport à la proue), N = Nœuds, A = valide
+    # Exemple de sortie : "$WIMWV,045.0,R,12.5,N,A*1B\r\n"</span>
+    awa_deg = <span class="fn">round</span>(awa_deg % <span class="nb">360</span>, <span class="nb">1</span>)   <span class="cm"># toujours positif, 1 décimale</span>
+    aws_kts = <span class="fn">round</span>(<span class="fn">max</span>(<span class="nb">0.0</span>, aws_kts), <span class="nb">1</span>) <span class="cm"># pas de vitesse négative</span>
+    body = <span class="st">f"WIMWV,{awa_deg:.1f},R,{aws_kts:.1f},N,A"</span>
+    <span class="kw">return</span> <span class="st">f"${body}*{checksum(body)}\r\n"</span></code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s12">12. src/data_logger.py — enregistrement CSV</h2>
+
+<p>Deux types de logs coexistent :</p>
+
+<table>
+  <tr><th>Classe</th><th>Déclenchement</th><th>Fréquence</th><th>Contenu</th><th>Usage</th></tr>
+  <tr><td><code>DataLogger</code></td><td>Bouton REC dans l'UI</td><td>10 Hz (chaque tick)</td><td>Toutes les données complètes</td><td>Entraîner les polaires ML</td></tr>
+  <tr><td><code>TelemetryLogger</code></td><td>Always-on (au démarrage)</td><td>1 point / 10s</td><td>Données + VMG + rendement</td><td>Historique de navigation, graphiques</td></tr>
+</table>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/data_logger.py — DataLogger (enregistrement manuel)
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">start</span>(self, sail_config: <span class="fn">str</span> = <span class="st">"gv_genois"</span>):
+    <span class="cm"># Nom de fichier horodaté avec la config voilure
+    # Ex: data/2024-06-15_14h30_gv_genois.csv</span>
+    filename = datetime.now().strftime(<span class="st">"%Y-%m-%d_%Hh%M"</span>) + <span class="st">f"_{sail_config}.csv"</span>
+    self._path = os.path.join(config.LOG_DIR, filename)
+    self._file = <span class="fn">open</span>(self._path, <span class="st">"w"</span>, newline=<span class="st">""</span>)
+    self._writer = csv.DictWriter(self._file, fieldnames=FIELDS)
+    self._writer.writeheader()
+    self._file.flush()  <span class="cm"># écrire immédiatement sur disque (pas garder en mémoire)</span>
+
+<span class="kw">def</span> <span class="fn">write</span>(self, data: InstrumentData, awa_filtered, sail_config, ...):
+    <span class="kw">if not</span> self.is_active:
+        <span class="kw">return</span>  <span class="cm"># silencieux si pas en enregistrement</span>
+    self._writer.writerow({...})
+    self._file.flush()  <span class="cm"># flush à chaque ligne = pas de perte si crash</span></code></pre>
+
+<div class="box box-tip">
+  <h4>Pourquoi flush() à chaque ligne ?</h4>
+  <p>Si le Pi se coupe brusquement (prise de courant à bord…), les données en mémoire tampon seraient perdues. <code>flush()</code> force l'écriture immédiate sur la carte SD. C'est une précaution marine.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s13">13. src/polar_model.py — machine learning polaires</h2>
+
+<p>Les "polaires" d'un voilier sont des courbes qui décrivent la vitesse maximale atteignable selon le vent (TWS et TWA). Elles sont habituellement fournies par le chantier sur papier, mais elles ne tiennent pas compte des conditions réelles : gréement vieilli, réglages, équipage, etc.</p>
+
+<p>On entraîne un modèle <strong>XGBoost</strong> sur les données réelles collectées avec le DataLogger pour obtenir des polaires personnalisées au bateau.</p>
+
+<h3>XGBoost — comment ça marche</h3>
+
+<p>XGBoost (eXtreme Gradient Boosting) est un algorithme d'arbres de décision en cascade. Il apprend en construisant des centaines d'arbres de décision successifs, chacun corrigeant les erreurs du précédent.</p>
+
+<div class="schema">Entrée : [TWS=12kt, TWA=45°, Gîte=8°]
+         ↓
+    Arbre 1 :  TWS > 10? → oui → TWA > 40? → oui → STW ≈ 6.2kt
+    Arbre 2 : (corrige l'erreur de l'arbre 1) → +0.1kt
+    Arbre 3 : (corrige encore) → -0.05kt
+    ...
+    Arbre 200 : petite correction finale
+         ↓
+    Prédiction finale : STW = 6.35kt</div>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/polar_model.py — entraînement XGBoost
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">train_from_df</span>(self, df, save=<span class="kw">True</span>):
+    <span class="cm"># Filtrer les données invalides</span>
+    df = df.dropna(subset=[<span class="st">"tws_kts"</span>, <span class="st">"twa_deg"</span>, <span class="st">"stw_kts"</span>])
+    df = df[(df[<span class="st">"stw_kts"</span>] > <span class="nb">1.0</span>) & (df[<span class="st">"tws_kts"</span>] > <span class="nb">2.0</span>)]  <span class="cm"># au mouillage ou trop peu de vent</span>
+
+    <span class="kw">if</span> <span class="fn">len</span>(df) &lt; <span class="nb">300</span>:  <span class="cm"># minimum 300 points pour entraîner</span>
+        <span class="kw">raise</span> ValueError(<span class="st">"Pas assez de données"</span>)
+
+    <span class="cm"># Features : TWS, TWA, gîte → Target : STW (ce qu'on essaie de prédire)</span>
+    X = df[[<span class="st">"tws_kts"</span>, <span class="st">"twa_deg"</span>, <span class="st">"heel_deg"</span>]].<span class="fn">abs</span>().values
+    y = df[<span class="st">"stw_kts"</span>].values
+
+    <span class="cm"># 80% pour entraîner, 20% pour évaluer (éviter le surapprentissage)</span>
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<span class="nb">0.2</span>)
+
+    self._model = XGBRegressor(
+        n_estimators=<span class="nb">200</span>,    <span class="cm"># 200 arbres</span>
+        max_depth=<span class="nb">5</span>,         <span class="cm"># profondeur max de chaque arbre</span>
+        learning_rate=<span class="nb">0.05</span>,  <span class="cm"># petit pas → meilleure généralisation</span>
+        n_jobs=-<span class="nb">1</span>            <span class="cm"># utiliser tous les cœurs CPU</span>
+    )
+    self._model.fit(X_train, y_train)
+
+    <span class="cm"># RMSE = Root Mean Square Error = erreur moyenne en nœuds</span>
+    rmse = (mean_squared_error(y_test, self._model.predict(X_test))) ** <span class="nb">0.5</span></code></pre>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/polar_model.py — optimisation VMG
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">predict_optimal_twa</span>(self, tws_kts, heel_deg, upwind=<span class="kw">True</span>):
+    <span class="cm"># VMG = Velocity Made Good = composante vers le vent (ou sous le vent)
+    # VMG = STW × cos(TWA) en montée, -STW × cos(TWA) en descente
+    # On cherche le TWA qui MAXIMISE le VMG</span>
+
+    <span class="kw">if</span> self._model:
+        twas = np.arange(<span class="nb">25.0</span>, <span class="nb">90.0</span>, <span class="nb">1.0</span>) <span class="kw">if</span> upwind <span class="kw">else</span> np.arange(<span class="nb">90.0</span>, <span class="nb">171.0</span>, <span class="nb">1.0</span>)
+
+        <span class="cm"># Prédire STW pour chaque TWA possible (vectorisé = rapide)</span>
+        X = np.column_stack([np.full(<span class="fn">len</span>(twas), tws_kts), twas, np.full(<span class="fn">len</span>(twas), <span class="fn">abs</span>(heel_deg))])
+        stws = self._model.predict(X)
+
+        <span class="cm"># Calculer le VMG pour chaque TWA et trouver le maximum</span>
+        vmgs = stws * np.cos(np.radians(twas)) * (<span class="nb">1</span> <span class="kw">if</span> upwind <span class="kw">else</span> -<span class="nb">1</span>)
+        <span class="kw">return</span> <span class="fn">float</span>(twas[np.argmax(vmgs)])   <span class="cm"># TWA optimal</span>
+
+    <span class="cm"># Fallback : table générique si pas encore de modèle ML</span>
+    twa_up, twa_dw = _generic_optimal_twa(tws_kts)
+    <span class="kw">return</span> twa_up <span class="kw">if</span> upwind <span class="kw">else</span> twa_dw</code></pre>
+
+<h3>Réentraînement automatique en arrière-plan</h3>
+
+<p>Un thread daemon dans <code>main.py</code> vérifie toutes les 10 minutes si de nouvelles données sont disponibles. Si +50 points ont été enregistrés depuis le dernier entraînement, il réentraîne le modèle et sauvegarde le fichier <code>.pkl</code> sur disque. La boucle principale détecte le changement de fichier via <code>reload_if_updated()</code> et charge le nouveau modèle sans interruption.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s14">14. src/autopilot.py — contrôle du pilote automatique</h2>
+
+<p>L'autopilot forge des phrases MWV et les envoie sur le port série <code>/dev/ttyUSB0</code> → MiniPlex Out1 → TP22. Il inclut deux mécanismes de sécurité.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/autopilot.py — rate limiting et envoi
+</div>
+<pre><code>MAX_RATE_DEG_PER_S = <span class="nb">5.0</span>   <span class="cm"># changement max d'angle par seconde</span>
+MIN_SEND_INTERVAL = <span class="nb">0.5</span>    <span class="cm"># envoyer max 2 Hz (pas besoin de plus)</span>
+
+<span class="kw">def</span> <span class="fn">_rate_limit</span>(self, target: <span class="fn">float</span>, dt: <span class="fn">float</span>) -> <span class="fn">float</span>:
+    <span class="cm"># Empêche les changements brusques qui feraient "partir" le pilote.
+    # Si target = 50° et awa_actuel = 40°, on ne va que jusqu'à 40 + 5*dt.
+    # À 2 Hz (dt=0.5s) : max 2.5° par envoi.</span>
+    <span class="kw">if</span> self._current_awa <span class="kw">is</span> <span class="kw">None</span>:
+        <span class="kw">return</span> target
+    max_delta = MAX_RATE_DEG_PER_S * <span class="fn">min</span>(dt, <span class="nb">2.0</span>)  <span class="cm"># cap à 2s si longue pause</span>
+    diff = <span class="fn">max</span>(-max_delta, <span class="fn">min</span>(max_delta, target - self._current_awa))
+    <span class="kw">return</span> self._current_awa + diff
+
+<span class="kw">def</span> <span class="fn">send_wind</span>(self, awa_target: <span class="fn">float</span>, aws_kts: <span class="fn">float</span>):
+    <span class="kw">if</span> self._serial <span class="kw">and</span> self._serial.is_open:
+        sentence = build_mwv(awa_out, aws_kts)
+        self._serial.write(sentence.encode())  <span class="cm"># ASCII → bytes → série</span></code></pre>
+
+<div class="box box-warn">
+  <h4>Sécurité Override MiniPlex</h4>
+  <p>Si le Pi ne répond plus (crash, coupure courant), le MiniPlex rebascule Out1 vers les instruments bruts après 10 secondes. Le TP22 retrouve ses données normales. On n'a pas besoin de gérer ce failsafe dans le code — le MiniPlex s'en charge.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s15">15. src/web_ui.py — interface web</h2>
+
+<p>Le module UI lance deux serveurs dans des threads séparés :</p>
+
+<ul>
+  <li><strong>HTTP :8080</strong> — sert <code>webapp/index.html</code> et les APIs JSON (<code>/api/sessions</code>, <code>/api/history</code>)</li>
+  <li><strong>WebSocket :8081</strong> — envoie l'état complet toutes les secondes, reçoit les commandes UI</li>
+</ul>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/web_ui.py — UIState (synchronisation thread-safe)
+</div>
+<pre><code><span class="kw">class</span> <span class="tp">UIState</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self._lock = threading.Lock()  <span class="cm"># protège _data contre les accès concurrents</span>
+        self._data = {<span class="st">"awa"</span>: <span class="kw">None</span>, <span class="st">"aws"</span>: <span class="kw">None</span>, ...}
+        self._cmds = []  <span class="cm"># file de commandes reçues du navigateur</span>
+
+    <span class="kw">def</span> <span class="fn">update</span>(self, **kw):
+        <span class="kw">with</span> self._lock:  <span class="cm"># verrou = une seule opération à la fois</span>
+            self._data.update(kw)
+
+    <span class="kw">def</span> <span class="fn">snapshot</span>(self) -> <span class="fn">dict</span>:
+        <span class="kw">with</span> self._lock:
+            <span class="kw">return</span> <span class="fn">dict</span>(self._data)  <span class="cm"># copie = libère le verrou immédiatement</span>
+
+    <span class="kw">def</span> <span class="fn">push_cmd</span>(self, cmd: <span class="fn">dict</span>):
+        <span class="kw">with</span> self._lock:
+            self._cmds.append(cmd)  <span class="cm"># WS handler (thread B) écrit ici</span>
+
+    <span class="kw">def</span> <span class="fn">pop_cmds</span>(self) -> <span class="fn">list</span>:
+        <span class="kw">with</span> self._lock:
+            cmds, self._cmds = self._cmds, []  <span class="cm"># main.py (thread A) lit ici</span>
+            <span class="kw">return</span> cmds</code></pre>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  src/web_ui.py — WebSocket handler
+</div>
+<pre><code><span class="kw">async def</span> <span class="fn">_ws_handler</span>(self, ws):
+    <span class="cm"># Deux tâches en parallèle par connexion :
+    # - _push : envoie l'état toutes les secondes
+    # - la boucle async for : reçoit les commandes du navigateur</span>
+    push = asyncio.create_task(self._push(ws))
+    <span class="kw">try</span>:
+        <span class="kw">async for</span> raw <span class="kw">in</span> ws:
+            self._state.push_cmd(json.loads(raw))  <span class="cm"># ex: {"type":"recording","value":"start"}</span>
+    <span class="kw">finally</span>:
+        push.cancel()  <span class="cm"># annuler le push si la connexion se ferme</span>
+
+<span class="kw">async def</span> <span class="fn">_push</span>(self, ws):
+    <span class="kw">while True</span>:
+        <span class="kw">await</span> ws.send(json.dumps(self._state.snapshot()))
+        <span class="kw">await</span> asyncio.sleep(<span class="nb">1.0</span>)  <span class="cm"># 1 Hz vers le navigateur</span></code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s16">16. main.py — la boucle principale</h2>
+
+<p>C'est le chef d'orchestre. Une boucle à 10 Hz qui lit tous les capteurs, filtre, calcule, log, et met à jour l'UI.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  main.py — structure de la boucle (100ms par itération)
+</div>
+<pre><code><span class="kw">while True</span>:
+    t0 = time.monotonic()  <span class="cm"># timestamp de début pour le timing de boucle</span>
+
+    <span class="cm"># ── 1. LECTURE CAPTEURS ──────────────────────────────────────────</span>
+    imu_data = imu.read()          <span class="cm"># roll, pitch, yaw depuis BNO055</span>
+    baro_data = baro.read()        <span class="cm"># pression, température depuis BMP280</span>
+    data = sk.get()                <span class="cm"># snapshot thread-safe des données Signal K</span>
+
+    <span class="cm"># ── 2. GPS BACKUP ────────────────────────────────────────────────</span>
+    <span class="kw">if</span> data.lat <span class="kw">is None and</span> gps_backup.connected:
+        <span class="cm"># Signal K n'a pas de position → utiliser le GPS de secours</span>
+        gps = gps_backup.get()
+        <span class="kw">if</span> gps[<span class="st">"lat"</span>] <span class="kw">is not None</span>:
+            data.lat = gps[<span class="st">"lat"</span>]
+            gps_source = <span class="st">"backup"</span>
+
+    <span class="cm"># ── 3. FILTRE KALMAN ─────────────────────────────────────────────</span>
+    <span class="kw">if</span> data.awa_deg <span class="kw">is not None</span>:
+        <span class="kw">if</span> data.awa_deg != prev_awa:
+            awa_filtered = kalman.update(data.awa_deg, roll)  <span class="cm"># nouvelle mesure</span>
+        <span class="kw">else</span>:
+            awa_filtered = kalman.predict_only()  <span class="cm"># pas de nouvelle mesure, avancer le filtre</span>
+
+    <span class="cm"># ── 4. VMG ───────────────────────────────────────────────────────</span>
+    <span class="cm"># VMG (Velocity Made Good) = vitesse de progression vers la bouée</span>
+    <span class="cm"># = STW × cos(TWA)  (projection du vecteur vitesse sur l'axe vent)</span>
+    vmg = data.stw_kts * math.cos(math.radians(data.twa_deg))
+
+    <span class="cm"># ── 5. RENDEMENT POLAIRE ─────────────────────────────────────────</span>
+    <span class="kw">if</span> args.mode <span class="kw">in</span> (<span class="st">"coach"</span>, <span class="st">"auto"</span>) <span class="kw">and</span> polar.is_trained:
+        rendement = polar.performance_ratio(data.stw_kts, data.tws_kts, data.twa_deg, roll)
+        <span class="cm"># rendement = 0.87 → tu vas à 87% de ta vitesse polaire optimale</span>
+
+    <span class="cm"># ── 6. HISTORIQUE PRESSION ──────────────────────────────────────</span>
+    <span class="kw">if</span> now - last_pressure_sample >= <span class="nb">60</span>:  <span class="cm"># 1 sample par minute</span>
+        pressure_history.append((now, baro_data[<span class="st">"pressure_hpa"</span>]))
+        <span class="cm"># Nettoyer l'historique : garder seulement les 3 dernières heures</span>
+        pressure_history = [(t, p) <span class="kw">for</span> t, p <span class="kw">in</span> pressure_history <span class="kw">if</span> t > now - <span class="nb">10800</span>]
+
+    <span class="cm"># ── 7. CALCUL CPA AIS ────────────────────────────────────────────</span>
+    <span class="cm"># CPA = Closest Point of Approach = distance minimale à un navire AIS
+    # Calculé à partir des positions et vecteurs vitesse respectifs</span>
+
+    <span class="cm"># ── 8. COMMANDES UI ─────────────────────────────────────────────</span>
+    <span class="kw">for</span> cmd <span class="kw">in</span> ui_state.pop_cmds():
+        <span class="cm"># Exemples : changement voilure, engage/disengage pilote, shutdown</span>
+
+    <span class="cm"># ── 9. ÉCRITURE CSV + TÉLÉMÉTRIE ─────────────────────────────────</span>
+    logger.write(data, awa_filtered, ...)
+    <span class="kw">if</span> now - last_telemetry_s >= <span class="nb">10.0</span>:
+        telemetry.write(...)
+
+    <span class="cm"># ── 10. UPDATE UI STATE ──────────────────────────────────────────</span>
+    ui_state.update(awa=..., aws=..., heel=..., ...)
+
+    <span class="cm"># ── 11. AUTOPILOT TP22 ──────────────────────────────────────────</span>
+    <span class="kw">if</span> autopilot_active <span class="kw">and</span> data.is_fresh():
+        awa_to_send = _compute_target_awa(polar, data, awa_filtered)
+        autopilot.send_wind(awa_to_send, data.aws_kts)
+
+    <span class="cm"># ── 12. TIMING 10 Hz ────────────────────────────────────────────</span>
+    elapsed = time.monotonic() - t0
+    sleep = <span class="nb">0.1</span> - elapsed  <span class="cm"># 100ms - temps écoulé</span>
+    <span class="kw">if</span> sleep > <span class="nb">0</span>:
+        time.sleep(sleep)  <span class="cm"># attendre le reste pour rester à 10 Hz exact</span></code></pre>
+
+<h3>Calcul du CPA (Closest Point of Approach)</h3>
+
+<p>Le CPA est la distance minimale à laquelle un navire AIS va passer par rapport à nous. On l'utilise pour trier les cibles par dangerosité dans l'UI radar.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  main.py — algorithme CPA
+</div>
+<pre><code><span class="kw">def</span> <span class="fn">_cpa_nm</span>(own_lat, own_lon, own_cog, own_sog, tgt_lat, tgt_lon, tgt_cog, tgt_sog):
+    <span class="cm"># Convertir positions en milles nautiques (coordonnées planes approximées)
+    # rx, ry = vecteur relatif de position (nous → cible)</span>
+    rx = (tgt_lon - own_lon) * <span class="nb">60</span> * math.cos(math.radians(own_lat))
+    ry = (tgt_lat - own_lat) * <span class="nb">60</span>
+
+    <span class="cm"># Vecteurs vitesse (en nœuds, composantes N/S et E/W)</span>
+    own_vx = own_sog * math.sin(math.radians(own_cog))
+    own_vy = own_sog * math.cos(math.radians(own_cog))
+    tgt_vx = tgt_sog * math.sin(math.radians(tgt_cog))
+    tgt_vy = tgt_sog * math.cos(math.radians(tgt_cog))
+
+    <span class="cm"># dvx, dvy = vitesse relative (nous nous rapprochons à quelle vitesse ?)
+    # tcpa = temps avant le CPA (en heures)
+    # Si tcpa < 0 : les navires s'éloignent déjà → CPA = distance actuelle</span>
+    dvx, dvy = tgt_vx - own_vx, tgt_vy - own_vy
+    dv2 = dvx**<span class="nb">2</span> + dvy**<span class="nb">2</span>
+    tcpa = -(rx * dvx + ry * dvy) / dv2
+    <span class="kw">return</span> math.sqrt((rx + dvx*tcpa)**<span class="nb">2</span> + (ry + dvy*tcpa)**<span class="nb">2</span>)</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s17">17. Scripts de déploiement</h2>
+
+<h3>scripts/centrale.service — systemd</h3>
+
+<p>Systemd est le gestionnaire de services Linux. Il démarre automatiquement <code>main.py</code> au boot du Pi, le redémarre si il plante, et centralise les logs.</p>
+
+<div class="file-header">
+  <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+  scripts/centrale.service
+</div>
+<pre><code>[Unit]
+Description=Centrale de Performance Marine
+After=network.target signalk.service  <span class="cm"># démarrer APRÈS Signal K</span>
+Wants=signalk.service                 <span class="cm"># Signal K doit être présent</span>
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/voile
+ExecStart=/home/pi/voile/venv/bin/python main.py --mode log
+Restart=on-failure   <span class="cm"># redémarrer si crash (pas si arrêt propre)</span>
+RestartSec=10        <span class="cm"># attendre 10s avant de redémarrer</span>
+StandardOutput=journal  <span class="cm"># logs dans journald (sudo journalctl -u centrale)</span>
+
+[Install]
+WantedBy=multi-user.target  <span class="cm"># démarrer quand le système est prêt</span></code></pre>
+
+<p>Commandes utiles :</p>
+
+<pre><code>sudo systemctl start centrale       <span class="cm"># démarrer</span>
+sudo systemctl stop centrale        <span class="cm"># arrêter</span>
+sudo systemctl restart centrale     <span class="cm"># redémarrer</span>
+sudo systemctl status centrale      <span class="cm"># état</span>
+sudo journalctl -u centrale -f      <span class="cm"># logs en temps réel (-f = follow)</span></code></pre>
+
+<h3>Changer le mode de fonctionnement</h3>
+
+<table>
+  <tr><th>Mode</th><th>Fonctionnalités actives</th><th>Comment changer</th></tr>
+  <tr><td><code>--mode log</code></td><td>Log CSV + UI web</td><td>Défaut dans le service</td></tr>
+  <tr><td><code>--mode coach</code></td><td>Log + rendement polaire dans l'UI</td><td>Modifier ExecStart dans le .service</td></tr>
+  <tr><td><code>--mode auto</code></td><td>Log + coach + contrôle TP22</td><td>Brancher le câble TP22 d'abord !</td></tr>
+</table>
+
+<pre><code>sudo nano /etc/systemd/system/centrale.service
+<span class="cm"># Modifier : ExecStart=...python main.py --mode coach</span>
+sudo systemctl daemon-reload
+sudo systemctl restart centrale</code></pre>
+
+<h3>WiFi à bord vs à la maison</h3>
+
+<table>
+  <tr><th>Situation</th><th>Connexion WiFi Pi</th><th>Accès UI</th></tr>
+  <tr><td>À la maison (dev)</td><td>SFR_3C4F (auto)</td><td>http://192.168.1.29:8080</td></tr>
+  <tr><td>Sur le bateau</td><td>Hotspot Centrale_DIY</td><td>http://10.10.10.1:8080</td></tr>
+</table>
+
+<p>Pour passer en mode hotspot (sur le bateau) :</p>
+<pre><code>sudo nmcli con down SFR_3C4F       <span class="cm"># désactiver le WiFi maison</span>
+sudo nmcli con up Centrale_DIY      <span class="cm"># activer le hotspot (SSID, mdp: voile2024)</span></code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2 id="s18">18. Les 3 jalons du projet</h2>
+
+<h3>Jalon 1 — Intégration et data logging <span class="chip chip-green">En cours</span></h3>
+
+<p>Objectif : valider que toute la chaîne fonctionne. Signal K lit le MiniPlex, notre code reçoit les données, les log en CSV, l'interface web est accessible depuis la tablette.</p>
+
+<p>Critères de validation :</p>
+<ul>
+  <li>Signal K affiche des données dans son interface (<code>http://192.168.1.29:3000</code>)</li>
+  <li>L'AWA, AWS, STW apparaissent dans notre webapp (<code>http://192.168.1.29:8080</code>)</li>
+  <li>Le bouton REC crée un fichier CSV avec des données</li>
+  <li>IMU → gîte affiché dans l'UI (valeur non nulle)</li>
+</ul>
+
+<h3>Jalon 2 — Modèle polaires <span class="chip chip-orange">Futur</span></h3>
+
+<p>Après plusieurs sorties en mer avec le Jalon 1 actif (REC pendant les navigations), on dispose de données CSV. On entraîne XGBoost :</p>
+
+<pre><code><span class="cm"># Sur le Pi :</span>
+cd ~/voile && source venv/bin/activate
+python scripts/train_polar.py --csv data/*.csv --config gv_genois
+
+<span class="cm"># Ou le Pi le fait automatiquement toutes les 10min si en mode coach</span>
+bash scripts/start.sh coach</code></pre>
+
+<h3>Jalon 3 — Kalman + TP22 <span class="chip chip-orange">Futur</span></h3>
+
+<p>Brancher le câble NMEA du TP22 (Out1-A → Signal/Rouge, Out1-B → Commun/Bleu), puis passer en mode auto :</p>
+
+<pre><code><span class="cm"># Dans le .service ou manuellement :</span>
+python main.py --mode auto
+
+<span class="cm"># Dans l'UI : cliquer "Appuyer pour engager" → le Pi prend le gouvernail du vent</span></code></pre>
+
+<hr>
+
+<div class="box box-info">
+  <h4>Commandes SSH utiles au quotidien</h4>
+  <pre style="margin:8px 0 0 0;background:transparent;color:inherit;padding:0;font-size:13px"><code>ssh pi@openplotter.local                    # connexion SSH
+sudo journalctl -u centrale -f              # logs temps réel
+ls -lh ~/voile/data/                        # voir les CSV
+sudo systemctl restart centrale             # redémarrer après modif
+sudo nmcli con up Centrale_DIY              # hotspot bateau
+sudo shutdown -h now                        # ou bouton ⏻ dans l'UI</code></pre>
+</div>
+
+<p style="text-align:center;color:#999;font-size:0.85em;margin-top:48px">Centrale de Performance Marine DIY — Documentation technique interne</p>
+
+</body>
+</html>
