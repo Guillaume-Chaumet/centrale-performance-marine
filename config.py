@@ -34,3 +34,6 @@ GPS_BAUD = int(os.getenv("GPS_BAUD", "9600"))
 
 # Data logging
 LOG_DIR = os.getenv("LOG_DIR", "data")
+
+# Polaire d'amorçage (fallback tant que le modèle ML n'est pas entraîné)
+BASE_POLAR_PATH = os.getenv("BASE_POLAR_PATH", os.path.join("polars", "Muscadet.pol"))

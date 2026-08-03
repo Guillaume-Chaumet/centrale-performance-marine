@@ -96,7 +96,8 @@ src/
   imu.py                BNO055 réel (Pi) ou stub sinusoïdal (Mac)
   kalman_wind.py        filtre de Kalman 1D sur AWA + correction roulis
   data_logger.py        CSV logging (data/YYYY-MM-DD_HHhMM.csv)
-  polar_model.py        entraînement XGBoost + inférence target STW
+  polar_model.py        entraînement XGBoost + inférence target STW (fallback polaire .pol)
+  polar_table.py        parse .pol (qtVlm) + interpolation bilinéaire — polaire d'amorçage
   autopilot.py          forge MWV + envoi série vers TP22
   nmea_utils.py         build_sentence, checksum, build_mwv
   barometer.py          BMP280 I2C — pression/temp (stub sinusoïdal Mac)
@@ -114,6 +115,7 @@ scripts/
   setup_pi.sh           install deps Pi, active I2C, droits série
   start.sh              démarre Signal K + main.py sur le Pi
 
+polars/                 polaires de référence .pol (Muscadet.pol — amorçage)
 data/                   CSV logs (gitignorés)
 models/                 modèles XGBoost sérialisés (gitignorés)
 ```
@@ -130,10 +132,12 @@ SIGNALK_WS_PORT=3000
 
 ## UIState — champs WebSocket (ws://10.10.10.1:8081)
 Tous les champs envoyés par le serveur vers le browser :
-`awa`, `awa_filtered`, `aws`, `twa`, `tws`, `stw`, `heel`, `vmg`, `rendement`,
-`pressure_hpa`, `temperature_c`, `pressure_trend`, `gps_source`,
+`awa`, `awa_filtered`, `aws`, `twa`, `tws`, `stw`, `sog`, `cog`, `heel`, `vmg`, `rendement`,
+`polar_curve` (liste [twa, stw] 0-180°, fond du radar), `polar_source` (`ml`|`base`|`none`),
+`pressure_hpa`, `temperature_c`, `heading`, `drift`, `twd`, `wind_shift`, `pressure_trend`,
+`gps_source`, `gps_sats`, `gps_hdop`, `gps_quality`,
 `sail_config`, `is_recording`, `rec_duration`, `is_fresh`, `autopilot_active`,
-`wind_alert`, `dep_alert`, `ais_vessels` (liste de dicts : mmsi, name, type, length, bearing, distance, cpa, sog, cog)
+`wind_alert`, `dep_alert`, `ais_vessels` (liste de dicts : mmsi, name, type, length, bearing, distance, cpa, tcpa, sog, cog)
 
 ## Ce qu'on ne fait pas
 - Pas de connexion internet en mer — tout est offline

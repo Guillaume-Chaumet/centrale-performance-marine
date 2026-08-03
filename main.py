@@ -228,13 +228,15 @@ def main():
         if boat_speed and data.twa_deg is not None:
             vmg = round(boat_speed * math.cos(math.radians(data.twa_deg)), 2)
 
-        # ── Rendement ─────────────────────────────────────────────────────────
+        # ── Rendement (cible ML ou polaire d'amorçage) ────────────────────────
         rendement: float | None = None
-        if args.mode in ("coach", "auto") and polar.is_trained:
-            if data.stw_kts and data.tws_kts and data.twa_deg:
-                rendement = polar.performance_ratio(
-                    data.stw_kts, data.tws_kts, data.twa_deg, data.heel_deg or 0
-                )
+        if boat_speed and data.tws_kts and data.twa_deg is not None:
+            rendement = polar.performance_ratio(
+                boat_speed, data.tws_kts, data.twa_deg, data.heel_deg or 0
+            )
+
+        # ── Courbe polaire cible pour le fond du radar (dynamique) ─────────────
+        polar_curve = polar.target_polar_curve(data.tws_kts, data.heel_deg or 0)
 
         # ── Pression historique + alertes ─────────────────────────────────────
         if baro_data["pressure_hpa"] is not None and now_wall - last_pressure_sample >= 60:
@@ -335,7 +337,7 @@ def main():
         if now_wall - last_telemetry_s >= 10.0:
             telemetry.write(data, awa_filtered, vmg, rendement, roll,
                             baro_data["pressure_hpa"], baro_data["temperature_c"],
-                            logger.is_active, temperature_air=data.temp_air_deg,
+                            logger.is_active,
                             heading=heading_deg, drift=drift_deg)
             last_telemetry_s = now_wall
 
@@ -365,9 +367,10 @@ def main():
             heel=_r(roll),
             vmg=vmg,
             rendement=_r(rendement, 3),
+            polar_curve=polar_curve,
+            polar_source=polar.source,
             pressure_hpa=baro_data["pressure_hpa"],
             temperature_c=baro_data["temperature_c"],
-            temperature_air_c=_r(data.temp_air_deg, 1),
             heading=_r(heading_deg, 0),
             drift=_r(drift_deg, 1),
             twd=twd,

@@ -4,6 +4,9 @@ import pickle
 
 import numpy as np
 
+import config
+from src.polar_table import PolarTable
+
 
 MODEL_PATH = os.path.join("models", "polar.pkl")
 MIN_TRAIN_SAMPLES = 300
@@ -43,8 +46,16 @@ class PolarModel:
         self._model_path = model_path
         self._model = None
         self._last_load_mtime = 0.0
+        self._base = PolarTable.from_file(getattr(config, "BASE_POLAR_PATH", None))
         if os.path.exists(model_path):
             self._load()
+
+    @property
+    def source(self) -> str:
+        """'ml' si modèle entraîné, sinon 'base' si polaire d'amorçage, sinon 'none'."""
+        if self._model:
+            return "ml"
+        return "base" if self._base else "none"
 
     def _load(self):
         with open(self._model_path, "rb") as f:
@@ -65,11 +76,13 @@ class PolarModel:
         return self._model is not None
 
     def predict_target_stw(self, tws_kts: float, twa_deg: float, heel_deg: float) -> float | None:
-        """STW cible selon la polaire ML. None si pas encore entraînée."""
-        if not self._model:
-            return None
-        X = np.array([[tws_kts, abs(twa_deg), abs(heel_deg)]])
-        return float(self._model.predict(X)[0])
+        """STW cible : polaire ML si entraînée, sinon polaire d'amorçage .pol."""
+        if self._model:
+            X = np.array([[tws_kts, abs(twa_deg), abs(heel_deg)]])
+            return float(self._model.predict(X)[0])
+        if self._base:
+            return self._base.speed(tws_kts, twa_deg)
+        return None
 
     def predict_optimal_twa(self, tws_kts: float, heel_deg: float, upwind: bool = True) -> float:
         """
@@ -92,8 +105,33 @@ class PolarModel:
             vmgs = stws * cos_twas if upwind else -stws * cos_twas
             return float(twas[np.argmax(vmgs)])
 
+        if self._base:
+            return self._base.optimal_twa(tws_kts, upwind=upwind)
+
         twa_up, twa_dw = _generic_optimal_twa(tws_kts)
         return twa_up if upwind else twa_dw
+
+    def target_polar_curve(self, tws_kts: float, heel_deg: float = 0.0,
+                           twa_step: float = 5.0) -> list[list[float]] | None:
+        """Courbe polaire cible [[twa, stw], ...] de 0 à 180° pour le TWS courant.
+
+        Utilise le modèle ML si entraîné, sinon la polaire d'amorçage .pol.
+        Sert de fond dynamique au radar polaire de l'UI.
+        """
+        if tws_kts is None or tws_kts <= 0:
+            return None
+        twas = np.arange(0.0, 180.0 + twa_step, twa_step)
+        if self._model:
+            X = np.column_stack([
+                np.full(len(twas), tws_kts),
+                twas,
+                np.full(len(twas), abs(heel_deg)),
+            ])
+            stws = self._model.predict(X)
+            return [[float(t), round(float(s), 3)] for t, s in zip(twas, stws)]
+        if self._base:
+            return [[t, s] for t, s in self._base.curve(tws_kts, twa_step)]
+        return None
 
     def performance_ratio(self, actual_stw: float, tws_kts: float, twa_deg: float, heel_deg: float) -> float | None:
         """Rendement réel vs polaire ML. None si pas encore entraînée."""

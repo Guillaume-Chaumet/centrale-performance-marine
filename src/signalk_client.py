@@ -35,7 +35,6 @@ class InstrumentData:
     cog_deg: Optional[float] = None   # Cap sur le fond (degrés)
     heel_deg: Optional[float] = None  # Gîte (degrés, positif = tribord)
     pitch_deg: Optional[float] = None
-    temp_air_deg: Optional[float] = None  # Température air extérieur (anémo, °C)
     hdg_true_deg: Optional[float] = None  # Cap vrai (HDT)
     hdg_mag_deg: Optional[float] = None   # Cap magnétique (HDG/HDM)
     mag_var_deg: Optional[float] = None   # Déclinaison magnétique (Est positif)
@@ -51,8 +50,6 @@ class InstrumentData:
         return (time.monotonic() - self.updated_at) < max_age_s
 
 
-_K2C = 273.15  # Kelvin → Celsius (Signal K stocke les températures en Kelvin)
-
 # path Signal K → (attribut InstrumentData, fonction de conversion vers l'unité UI)
 _PATHS = {
     "environment.wind.angleApparent":  ("awa_deg",      lambda v: v * RAD2DEG),
@@ -64,7 +61,6 @@ _PATHS = {
     "navigation.courseOverGroundTrue": ("cog_deg",      lambda v: v * RAD2DEG),
     "navigation.attitude.roll":        ("heel_deg",     lambda v: v * RAD2DEG),
     "navigation.attitude.pitch":       ("pitch_deg",    lambda v: v * RAD2DEG),
-    "environment.outside.temperature": ("temp_air_deg", lambda v: v - _K2C),
     "navigation.headingTrue":          ("hdg_true_deg", lambda v: v * RAD2DEG),
     "navigation.headingMagnetic":      ("hdg_mag_deg",  lambda v: v * RAD2DEG),
     "navigation.magneticVariation":    ("mag_var_deg",  lambda v: v * RAD2DEG),

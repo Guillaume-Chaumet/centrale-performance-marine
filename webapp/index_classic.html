@@ -108,7 +108,7 @@ button { font-family: 'Archivo', sans-serif; }
         </div>
         <div style="margin-top:10px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">FILTRE KALMAN 1D · BNO055 ROLL-CORR · 10 Hz</div>
         <div id="t-headchip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">COG —° · CAP —° · DÉRIVE —°</div>
-        <div id="t-barochip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">- hPa · T.ext -° · T.boît -°</div>
+        <div id="t-barochip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">- hPa · T.boît -°</div>
         <div id="t-gpschip" style="margin-top:6px;margin-left:6px;display:inline-block;padding:5px 10px;background:var(--tile2);border:1px solid var(--line);border-radius:3px;font:500 11px 'IBM Plex Mono',monospace;color:var(--label);letter-spacing:.06em">GPS - sats · HDOP -</div>
       </div>
 
@@ -672,9 +672,8 @@ function applyData(d) {
   }
   if (g('t-barochip')) {
     const p  = d.pressure_hpa != null ? d.pressure_hpa.toFixed(0) + ' hPa' : '- hPa';
-    const te = d.temperature_air_c != null ? d.temperature_air_c.toFixed(1) + '°' : '-°';
     const tb = d.temperature_c != null ? d.temperature_c.toFixed(1) + '°' : '-°';
-    g('t-barochip').textContent = `${p} · T.ext ${te} · T.boît ${tb}`;
+    g('t-barochip').textContent = `${p} · T.boît ${tb}`;
   }
   if (g('t-gpschip')) {
     const sats = d.gps_sats != null ? d.gps_sats : '-';
@@ -741,7 +740,6 @@ const HIST_CHARTS = [
   { id:'rdt',  key:'rendement',      color:'#b8a0e8', scale: v => v * 100 },
   { id:'pres',    key:'pressure_hpa',    color:'#e87850' },
   { id:'temp',    key:'temperature_c',   color:'#e85f5f' },
-  { id:'tempair', key:'temperature_air', color:'#e8975f' },
   { id:'hdg',     key:'heading_deg',     color:'#8fb8c7' },
   { id:'drift',   key:'drift_deg',       color:'#c78f9f' },
 ];

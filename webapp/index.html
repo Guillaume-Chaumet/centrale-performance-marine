@@ -24,6 +24,10 @@
   /* radii */
   --r-sm: 4px; --r-md: 8px; --r-lg: 12px; --r-xl: 18px;
 
+  /* topbar text (theme-independent: la topbar reste sombre dans les deux thèmes) */
+  --topbar-ink: #eaf1f8;
+  --topbar-dim: #9fb2c6;
+
   /* fixed semantic sail colors (theme-independent) */
   --stbd: #23c56b;      /* tribord = vert */
   --port: #ff4d4d;      /* bâbord = rouge */
@@ -55,29 +59,29 @@
 }
 /* ── DAY (high contrast for sunlight) ── */
 [data-theme="day"] {
-  --bg: #dde6ef;
-  --bg-2: #e8eef5;
+  --bg: #f4f7fb;
+  --bg-2: #ffffff;
   --panel: #ffffff;
-  --panel-2: #f2f6fb;
-  --line: #c3d1e0;
-  --line-strong: #a9bccf;
-  --ink: #0a1826;
-  --ink-dim: #26384a;
-  --muted: #5d7186;
-  --label: #4a5e73;
-  --accent: #0b7fa8;
-  --hero: #06121f;
-  --grid: #cfdae7;
-  --track: #d3ddea;
-  --topbar: #0a1826;
-  --shadow: rgba(20,40,70,.18);
+  --panel-2: #eef3f9;
+  --line: #aebfd1;
+  --line-strong: #8ba1ba;
+  --ink: #030a12;
+  --ink-dim: #16283a;
+  --muted: #3d5268;
+  --label: #33475b;
+  --accent: #0a6d8f;
+  --hero: #030a12;
+  --grid: #c4d2e2;
+  --track: #cbd8e8;
+  --topbar: #071320;
+  --shadow: rgba(20,40,70,.22);
   --scrim: rgba(10,20,35,.5);
-  --stbd: #12a352;
-  --port: #d62828;
-  --wind: #b026c9;
-  --target: #0b86b8;
-  --warn: #d98200;
-  --danger: #d62828;
+  --stbd: #0c8f45;
+  --port: #cc2222;
+  --wind: #9c1fb5;
+  --target: #06718f;
+  --warn: #b96b00;
+  --danger: #cc2222;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -168,7 +172,7 @@ button { font-family: var(--font-ui); color: inherit; }
 }
 </style>
 </head>
-<body data-theme="night">
+<body data-theme="day">
 
 <!-- ── Shutdown modal ─────────────────────────────────────────────── -->
 <div id="shutdown-modal" onclick="closeShutdownModal()" style="display:none;position:fixed;inset:0;z-index:999;background:var(--scrim);backdrop-filter:blur(5px);align-items:center;justify-content:center">
@@ -192,18 +196,18 @@ button { font-family: var(--font-ui); color: inherit; }
   <div class="topbar">
     <div class="topbar-side">
       <span id="t-dot" class="dot" style="background:var(--danger)"></span>
-      <span style="font:600 13px var(--font-mono);color:var(--ink-dim);letter-spacing:.08em">SIGNAL K · BORD</span>
+      <span style="font:600 13px var(--font-mono);color:var(--topbar-dim);letter-spacing:.08em">SIGNAL K · BORD</span>
       <span id="t-sail-top" class="chip" style="color:var(--accent)">GV + GENOIS</span>
       <span id="t-gpshealth" class="chip" title="Satellites · HDOP · Qualité du fix">GPS -- · HDOP --</span>
     </div>
-    <div class="topbar-side" style="font:600 12px var(--font-mono);color:var(--ink-dim)">
+    <div class="topbar-side" style="font:600 12px var(--font-mono);color:var(--topbar-dim)">
       <span style="display:flex;align-items:center;gap:6px">
         <span id="t-recdot" class="dot" style="width:7px;height:7px;background:var(--muted)"></span>
         <span id="t-rectext">CSV ARRÊTÉ</span>
       </span>
       <button onclick="toggleTheme()" id="t-thbtn" class="iconbtn">☾ Nuit</button>
       <button onclick="openShutdownModal()" title="Éteindre le Pi" class="iconbtn danger" style="font-size:14px">⏻</button>
-      <span id="t-clock" class="num" style="font-size:22px;color:var(--ink);line-height:1">--:--</span>
+      <span id="t-clock" class="num" style="font-size:22px;color:var(--topbar-ink);line-height:1">--:--</span>
     </div>
   </div>
 
@@ -249,7 +253,7 @@ button { font-family: var(--font-ui); color: inherit; }
         <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
           <span class="chip">Kalman 1D · BNO055 roll · 10 Hz</span>
           <span id="t-headchip" class="chip">COG -° · CAP -° · Dérive -°</span>
-          <span id="t-barochip" class="chip">- hPa · T.ext -° · T.boît -°</span>
+          <span id="t-barochip" class="chip">- hPa · T.boît -°</span>
         </div>
       </div>
 
@@ -304,13 +308,12 @@ button { font-family: var(--font-ui); color: inherit; }
           <circle cx="75" cy="75" r="20" fill="none" stroke="var(--grid)" stroke-width="1"></circle>
           <line x1="75" y1="13" x2="75" y2="137" stroke="var(--grid)" stroke-width="1"></line>
           <line x1="13" y1="75" x2="137" y2="75" stroke="var(--grid)" stroke-width="1"></line>
-          <path d="M75 16 C112 22 130 60 116 100 C108 124 92 134 75 134 C58 134 42 124 34 100 C20 60 38 22 75 16 Z" fill="rgba(53,224,255,.10)" stroke="var(--target)" stroke-opacity=".6" stroke-width="1.5"></path>
-          <circle id="t-polardot-target" cx="75" cy="13" r="5" fill="none" stroke="var(--wind)" stroke-width="1.5" opacity="0" style="transition:cx .5s,cy .5s,opacity .3s"></circle>
-          <circle id="t-polardot" cx="75" cy="75" r="5" fill="var(--target)" style="transition:cx .5s,cy .5s"></circle>
+          <path id="t-polarcurve" d="" fill="rgba(53,224,255,.12)" stroke="var(--target)" stroke-opacity=".7" stroke-width="1.5" style="transition:d .5s"></path>
+          <circle id="t-polardot" cx="75" cy="75" r="4.5" fill="var(--wind)" style="transition:cx .5s,cy .5s"></circle>
         </svg>
         <div>
-          <span class="kicker-sm">Polaire live</span>
-          <div style="font:500 11px var(--font-mono);color:var(--muted);margin-top:4px;line-height:1.5">XGBoost · <span id="t-polarsail">GV + GENOIS</span><br><span style="color:var(--target)">●</span> mesure · <span style="color:var(--wind)">○</span> cible</div>
+          <span class="kicker-sm">Polaire cible</span>
+          <div style="font:500 11px var(--font-mono);color:var(--muted);margin-top:4px;line-height:1.5"><span id="t-polarsrc">Polaire de base</span> · <span id="t-polarsail">GV + GENOIS</span><br><span style="color:var(--target)">━</span> cible · <span style="color:var(--wind)">●</span> mesure</div>
         </div>
       </div>
       <div style="background:var(--bg);padding:14px 20px">
@@ -384,9 +387,9 @@ button { font-family: var(--font-ui); color: inherit; }
 
   <!-- status bar -->
   <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--topbar);border-bottom:1px solid var(--line)">
-    <span id="m-clock" class="num" style="font-size:18px;color:var(--ink);line-height:1">--:--</span>
-    <span id="m-sk" style="font:600 11px var(--font-mono);color:var(--muted)">Signal K</span>
-    <span id="m-gpshealth" style="font:600 10px var(--font-mono);color:var(--muted)">GPS --</span>
+    <span id="m-clock" class="num" style="font-size:18px;color:var(--topbar-ink);line-height:1">--:--</span>
+    <span id="m-sk" style="font:600 11px var(--font-mono);color:var(--topbar-dim)">Signal K</span>
+    <span id="m-gpshealth" style="font:600 10px var(--font-mono);color:var(--topbar-dim)">GPS --</span>
     <div style="display:flex;gap:6px">
       <button onclick="toggleTheme()" id="m-thbtn" class="iconbtn" style="padding:3px 9px;font-size:11px">☾ Nuit</button>
       <button onclick="openShutdownModal()" title="Éteindre le Pi" class="iconbtn danger" style="padding:3px 8px;font-size:13px">⏻</button>
@@ -493,7 +496,7 @@ button { font-family: var(--font-ui); color: inherit; }
 <script>
 const WS_URL = `ws://${location.hostname}:8081`;
 let ws = null, lastData = {};
-const S = { theme:'night', view:'instruments', sail:0, pilot:false, rec:false, menuOpen:false, windDismissed:false, depDismissed:false, aisRange:1 };
+const S = { theme:'day', view:'instruments', sail:0, pilot:false, rec:false, menuOpen:false, windDismissed:false, depDismissed:false, aisRange:1 };
 
 // portees radar AIS (3 niveaux) - anneaux a 1/3, 2/3, 3/3 de la portee max
 const AIS_RANGES = [
@@ -843,9 +846,8 @@ function applyData(d) {
   }
   if (g('t-barochip')) {
     const p  = d.pressure_hpa != null ? d.pressure_hpa.toFixed(0) + ' hPa' : '- hPa';
-    const te = d.temperature_air_c != null ? d.temperature_air_c.toFixed(1) + '°' : '-°';
     const tb = d.temperature_c != null ? d.temperature_c.toFixed(1) + '°' : '-°';
-    g('t-barochip').textContent = `${p} · T.ext ${te} · T.boît ${tb}`;
+    g('t-barochip').textContent = `${p} · T.boît ${tb}`;
   }
 
   const rdt = d.rendement != null ? Math.round(d.rendement * 100) : null;
@@ -853,21 +855,40 @@ function applyData(d) {
   if (g('t-rdtbar')) g('t-rdtbar').style.width = (rdt ?? 0) + '%';
   set('m-rdtsm', rdt != null ? ` ${rdt}%` : ' -');
 
-  // polar dot - pas de loch : on utilise SOG comme vitesse bateau (repli STW)
+  // polaire cible (fond) + point mesuré - pas de loch : SOG comme vitesse bateau (repli STW)
   const boatSpeed = d.sog != null ? d.sog : d.stw;
-  if (d.twa != null && boatSpeed != null) {
-    const a = Math.abs(d.twa) * Math.PI / 180;
-    const r = Math.min(Math.abs(boatSpeed) / 9, 1.0) * 62;
-    const dot = g('t-polardot');
-    if (dot) { dot.setAttribute('cx', (75 + r * Math.sin(a)).toFixed(1)); dot.setAttribute('cy', (75 - r * Math.cos(a)).toFixed(1)); }
-    const tgt = g('t-polardot-target');
-    if (tgt && d.rendement != null && d.rendement > 0) {
-      const rT = Math.min((boatSpeed / d.rendement) / 9, 1.0) * 62;
-      tgt.setAttribute('cx', (75 + rT * Math.sin(a)).toFixed(1));
-      tgt.setAttribute('cy', (75 - rT * Math.cos(a)).toFixed(1));
-      tgt.setAttribute('opacity', '0.75');
-    } else if (tgt) { tgt.setAttribute('opacity', '0'); }
+  const R_MAX = 62, CX = 75, CY = 75;
+  const curve = d.polar_curve;
+  // échelle commune courbe + point : max de la polaire cible et de la mesure
+  let scale = 9;
+  if (curve && curve.length) {
+    let mx = 0; for (const p of curve) if (p[1] > mx) mx = p[1];
+    scale = Math.max(mx, boatSpeed || 0) * 1.08 || 9;
+  } else if (boatSpeed) {
+    scale = Math.max(boatSpeed * 1.2, 4);
   }
+  // tracé de la courbe : tribord (TWA 0→180) puis bâbord (180→0) en miroir
+  const pc = g('t-polarcurve');
+  if (pc) {
+    if (curve && curve.length) {
+      const pts = [];
+      for (const [t, s] of curve) { const a = t * Math.PI / 180, r = Math.min(s / scale, 1) * R_MAX; pts.push([CX + r * Math.sin(a), CY - r * Math.cos(a)]); }
+      for (let i = curve.length - 1; i >= 0; i--) { const [t, s] = curve[i]; const a = t * Math.PI / 180, r = Math.min(s / scale, 1) * R_MAX; pts.push([CX - r * Math.sin(a), CY - r * Math.cos(a)]); }
+      pc.setAttribute('d', 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L') + ' Z');
+    } else { pc.setAttribute('d', ''); }
+  }
+  // point mesuré
+  const dot = g('t-polardot');
+  if (dot && d.twa != null && boatSpeed != null) {
+    const a = Math.abs(d.twa) * Math.PI / 180;
+    const r = Math.min(Math.abs(boatSpeed) / scale, 1.0) * R_MAX;
+    dot.setAttribute('cx', (CX + r * Math.sin(a)).toFixed(1));
+    dot.setAttribute('cy', (CY - r * Math.cos(a)).toFixed(1));
+    dot.setAttribute('opacity', '1');
+  } else if (dot) { dot.setAttribute('opacity', '0'); }
+  // source de la polaire (base .pol vs ML)
+  const src = g('t-polarsrc');
+  if (src) src.textContent = d.polar_source === 'ml' ? 'Polaire ML' : (d.polar_source === 'base' ? 'Polaire de base' : 'Polaire -');
 
   renderShift(d);
   renderGpsHealth(d);
@@ -908,7 +929,6 @@ const HIST_CHARTS = [
   { id:'rdt',  key:'rendement',      color:'#b8a0e8', label:'Rendement · %', scale: v => v * 100 },
   { id:'pres',    key:'pressure_hpa',    color:'#e87850', label:'Baro · hPa' },
   { id:'temp',    key:'temperature_c',   color:'#e85f5f', label:'T boitier · °C' },
-  { id:'tempair', key:'temperature_air', color:'#e8975f', label:'T ext · °C' },
   { id:'hdg',     key:'heading_deg',     color:'#8fb8c7', label:'Cap · °' },
   { id:'drift',   key:'drift_deg',       color:'#c78f9f', label:'Dérive · °' },
 ];
